@@ -1,77 +1,175 @@
 ﻿@page "/Account/Manage"
-
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
 @using SpaFinal213.Data
-
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
+@inject RoleManager<IdentityRole> RoleManager
 @inject IdentityUserAccessor UserAccessor
-@inject IdentityRedirectManager RedirectManager
+@inject NavigationManager Navigation
 
 <PageTitle>Profile</PageTitle>
 
 <h3>Profile</h3>
-<StatusMessage />
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <div class="alert alert-success">@StatusMessage</div>
+}
 
 <div class="row">
     <div class="col-xl-6">
-        <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post">
+        <EditForm Model="Input" OnValidSubmit="OnValidSubmitAsync">
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert" />
+            <ValidationSummary class="text-danger" />
+
+            <!-- Username -->
             <div class="form-floating mb-3">
-                <input type="text" value="@username" id="username" class="form-control" placeholder="Choose your username." disabled />
-                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" value="@Username" disabled />
+                <label>Username</label>
             </div>
+
+            <!-- Phone -->
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.PhoneNumber" id="Input.PhoneNumber" class="form-control" placeholder="Enter your phone number" />
-                <label for="Input.PhoneNumber" class="form-label">Phone number</label>
+                <InputText @bind-Value="Input.PhoneNumber" class="form-control" />
+                <label>Phone number</label>
                 <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+
+            <!-- Role -->
+            <div class="mb-3">
+                <label class="form-label">Account role</label>
+                <InputSelect @bind-Value="Input.SelectedRole" class="form-select" TValue="string">
+                    <option value="">-- none --</option>
+                    <option value="Customer">Customer</option>
+                    <option value="Employee">Employee</option>
+                </InputSelect>
+                <div class="form-text">Select either Customer or Employee.</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Save</button>
         </EditForm>
     </div>
 </div>
 
 @code {
-    private ApplicationUser user = default!;
-    private string? username;
-    private string? phoneNumber;
+    private ApplicationUser UserEntity = default!;
+    private string Username = default!;
+    private string PhoneNumber = default!;
+    private string? StatusMessage;
 
-    [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
-
-    [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-        username = await UserManager.GetUserNameAsync(user);
-        phoneNumber = await UserManager.GetPhoneNumberAsync(user);
+        // Load user
+        UserEntity = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        Username = await UserManager.GetUserNameAsync(UserEntity);
+        PhoneNumber = await UserManager.GetPhoneNumberAsync(UserEntity);
 
-        Input.PhoneNumber ??= phoneNumber;
+        Input.PhoneNumber = PhoneNumber;
+
+        // Ensure roles exist
+        await EnsureRoleExistsAsync("Customer");
+        await EnsureRoleExistsAsync("Employee");
+
+        // Populate current role
+        var roles = await UserManager.GetRolesAsync(UserEntity);
+        if (roles.Contains("Customer"))
+            Input.SelectedRole = "Customer";
+        else if (roles.Contains("Employee"))
+            Input.SelectedRole = "Employee";
+        else
+            Input.SelectedRole = string.Empty;
     }
 
     private async Task OnValidSubmitAsync()
     {
-        if (Input.PhoneNumber != phoneNumber)
+        try
         {
-            var setPhoneResult = await UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-            if (!setPhoneResult.Succeeded)
+            // Refresh user from UserManager
+            var appUser = await UserManager.FindByIdAsync(UserEntity.Id);
+            if (appUser is null)
             {
-                RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set phone number.", HttpContext);
+                StatusMessage = "Error: user not found.";
+                return;
             }
-        }
 
-        await SignInManager.RefreshSignInAsync(user);
-        RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
+            // Update phone if changed
+            if (Input.PhoneNumber != PhoneNumber)
+            {
+                var phoneResult = await UserManager.SetPhoneNumberAsync(appUser, Input.PhoneNumber);
+                if (!phoneResult.Succeeded)
+                {
+                    StatusMessage = $"Error updating phone: {string.Join(", ", phoneResult.Errors.Select(e => e.Description))}";
+                    return;
+                }
+                PhoneNumber = Input.PhoneNumber;
+            }
+
+            // Remove other roles
+            var currentRoles = (await UserManager.GetRolesAsync(appUser)).ToList();
+            var selected = Input.SelectedRole?.Trim() ?? string.Empty;
+
+            var rolesToRemove = currentRoles
+                .Where(r => r == "Customer" || r == "Employee")
+                .Where(r => r != selected)
+                .ToList();
+
+            if (rolesToRemove.Any())
+            {
+                var removeResult = await UserManager.RemoveFromRolesAsync(appUser, rolesToRemove);
+                if (!removeResult.Succeeded)
+                {
+                    StatusMessage = $"Error removing roles: {string.Join(", ", removeResult.Errors.Select(e => e.Description))}";
+                    return;
+                }
+            }
+
+            // Refresh roles after removal
+            currentRoles = (await UserManager.GetRolesAsync(appUser)).ToList();
+
+            // Add selected role if not already assigned
+            if (!string.IsNullOrEmpty(selected) && !currentRoles.Contains(selected))
+            {
+                var addResult = await UserManager.AddToRoleAsync(appUser, selected);
+                if (!addResult.Succeeded)
+                {
+                    StatusMessage = $"Error adding role '{selected}': {string.Join(", ", addResult.Errors.Select(e => e.Description))}";
+                    return;
+                }
+            }
+
+            // Refresh sign-in
+            await SignInManager.RefreshSignInAsync(appUser);
+
+            UserEntity = appUser;
+            StatusMessage = "Your profile has been updated.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Unexpected error: {ex.Message}";
+        }
     }
 
-    private sealed class InputModel
+    private async Task EnsureRoleExistsAsync(string roleName)
+    {
+        if (!await RoleManager.RoleExistsAsync(roleName))
+        {
+            await RoleManager.CreateAsync(new IdentityRole(roleName));
+        }
+    }
+
+    private class InputModel
     {
         [Phone]
         [Display(Name = "Phone number")]
         public string? PhoneNumber { get; set; }
+
+        [Display(Name = "Role")]
+        public string? SelectedRole { get; set; }
     }
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
 }
