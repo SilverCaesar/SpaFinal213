@@ -1,0 +1,135 @@
+﻿@page "/bookappointment"
+@using SpaFinal213.Models
+@using SpaFinal213.Data
+@using System
+@inject ApplicationDbContext Db
+@inject NavigationManager Navigation
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.Forms
+
+<h3>Book New Appointment</h3>
+
+<hr />
+
+<EditForm Model="@newCustomer" OnValidSubmit="CreateAppointment" FormName="MakeAppointment">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <h4>Step 1: New Customer</h4>
+    <div class="mb-3">
+        <label class="form-label">First Name</label>
+        <InputText class="form-control" @bind-Value="newCustomer.Fname" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Last Name</label>
+        <InputText class="form-control" @bind-Value="newCustomer.Lname" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Notes</label>
+        <InputTextArea class="form-control" @bind-Value="newCustomer.Notes" />
+    </div>
+
+    <h4>Step 2: Appointment Details</h4>
+    <div class="mb-3">
+        <label class="form-label">Employee</label>
+        <InputSelect class="form-control" @bind-Value="selectedEmployeeId" TValue="int?">
+            <option value="">-- Select Employee --</option>
+            @foreach (var emp in employees)
+            {
+                <option value="@emp.EmployeeId">@emp.FName @emp.LName</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Service</label>
+        <InputSelect class="form-control" @bind-Value="selectedServiceId" TValue="int?">
+            <option value="">-- Select Service --</option>
+            @foreach (var srv in services)
+            {
+                <option value="@srv.Service_Id">@srv.Name (@srv.Duration mins, @srv.Price:C)</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Appointment Date & Time</label>
+        <InputDate class="form-control" @bind-Value="appointmentDate" />
+        <input type="time" class="form-control mt-1" @bind="appointmentTime" @bind:format="HH:mm" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Notes</label>
+        <InputTextArea class="form-control" @bind-Value="appointmentNotes" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Appointment</button>
+</EditForm>
+
+@code {
+    private Customer newCustomer = new Customer
+    {
+        DateAccount = DateTime.Now
+    };
+
+    private List<Employee> employees = new();
+    private List<Service> services = new();
+
+    private int? selectedEmployeeId;
+    private int? selectedServiceId;
+
+    private DateTime appointmentDate = DateTime.Today;
+    // Use TimeOnly for binding to <input type="time">
+    private TimeOnly appointmentTime = TimeOnly.FromTimeSpan(TimeSpan.Zero);
+
+    private string? appointmentNotes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        employees = await Db.Employee.ToListAsync();
+        services = await Db.Service.ToListAsync();
+    }
+
+    private async Task CreateAppointment()
+    {
+        if (selectedEmployeeId == null || selectedServiceId == null)
+        {
+            // Add proper validation/error handling (could show a message)
+            return;
+        }
+
+        // Save new Customer
+        Db.Customer.Add(newCustomer);
+        await Db.SaveChangesAsync();
+
+        // Get selected Employee and Service
+        var employee = await Db.Employee.FindAsync(selectedEmployeeId);
+        var service = await Db.Service.FindAsync(selectedServiceId);
+
+        if (employee == null || service == null)
+            return;
+
+        // When creating the Appointment
+        var appointmentStart = appointmentDate.Date + appointmentTime.ToTimeSpan();
+
+        // Create Appointment
+        var appointment = new Appointment
+        {
+            Customer_Id = newCustomer.Customer_Id,
+            Employee_Id = employee.EmployeeId,
+            Service_Id = service.Service_Id,
+            Date = appointmentStart,
+            Start = null,
+            Duration = service.Duration,
+            Price = service.Price,
+            Notes = appointmentNotes,
+            Status = "Scheduled"
+        };
+
+        Db.Appointment.Add(appointment);
+        await Db.SaveChangesAsync();
+
+        // Navigate or show success
+        Navigation.NavigateTo("/appointments");
+    }
+}
