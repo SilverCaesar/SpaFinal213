@@ -8,29 +8,35 @@
 
 <PageTitle>Index</PageTitle>
 
-<h1>Index</h1>
+<div class="centered-panel">
+    <div class="panel-inner">
+        <div class="panel-card full">
+            <h1>Index</h1>
 
-<p>
-    <a href="appointments/create">Create New</a>
-</p>
+            <p>
+                <a href="appointments/create">Create New</a>
+            </p>
 
-<QuickGrid Class="table" Items="context.Appointment">
-    <PropertyColumn Property="appointment => appointment.Customer_Id" />
-    <PropertyColumn Property="appointment => appointment.Employee_Id" />
-    <PropertyColumn Property="appointment => appointment.Service_Id" />
-    <PropertyColumn Property="appointment => appointment.Date" />
-    <PropertyColumn Property="appointment => appointment.Start" />
-    <PropertyColumn Property="appointment => appointment.Status" />
-    <PropertyColumn Property="appointment => appointment.Notes" />
-    <PropertyColumn Property="appointment => appointment.Price" />
-    <PropertyColumn Property="appointment => appointment.Duration" />
+            <QuickGrid Class="table" Items="context.Appointment">
+                <PropertyColumn Property="appointment => appointment.Customer_Id" />
+                <PropertyColumn Property="appointment => appointment.Employee_Id" />
+                <PropertyColumn Property="appointment => appointment.Service_Id" />
+                <PropertyColumn Property="appointment => appointment.Date" />
+                <PropertyColumn Property="appointment => appointment.Start" />
+                <PropertyColumn Property="appointment => appointment.Status" />
+                <PropertyColumn Property="appointment => appointment.Notes" />
+                <PropertyColumn Property="appointment => appointment.Price" />
+                <PropertyColumn Property="appointment => appointment.Duration" />
 
-    <TemplateColumn Context="appointment">
-        <a href="@($"appointments/edit?appointment_id={appointment.Appointment_Id}")">Edit</a> |
-        <a href="@($"appointments/details?appointment_id={appointment.Appointment_Id}")">Details</a> |
-        <a href="@($"appointments/delete?appointment_id={appointment.Appointment_Id}")">Delete</a>
-    </TemplateColumn>
-</QuickGrid>
+                <TemplateColumn Context="appointment">
+                    <a href="@($"appointments/edit?appointment_id={appointment.Appointment_Id}")">Edit</a> |
+                    <a href="@($"appointments/details?appointment_id={appointment.Appointment_Id}")">Details</a> |
+                    <a href="@($"appointments/delete?appointment_id={appointment.Appointment_Id}")">Delete</a>
+                </TemplateColumn>
+            </QuickGrid>
+        </div>
+    </div>
+</div>
 
 @code {
     private ApplicationDbContext context = default!;

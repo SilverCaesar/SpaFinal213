@@ -8,24 +8,30 @@
 
 <PageTitle>Index</PageTitle>
 
-<h1>Index</h1>
+<div class="centered-panel">
+    <div class="panel-inner">
+        <div class="panel-card full">
+            <h1>Index</h1>
 
-<p>
-    <a href="employees/create">Create New</a>
-</p>
+            <p>
+                <a href="employees/create">Create New</a>
+            </p>
 
-<QuickGrid Class="table" Items="context.Employee">
-    <PropertyColumn Property="employee => employee.ApplicationUserId" />
-    <PropertyColumn Property="employee => employee.FName" />
-    <PropertyColumn Property="employee => employee.LName" />
-    <PropertyColumn Property="employee => employee.EmployeeType" />
+            <QuickGrid Class="table" Items="context.Employee">
+                <PropertyColumn Property="employee => employee.ApplicationUserId" />
+                <PropertyColumn Property="employee => employee.FName" />
+                <PropertyColumn Property="employee => employee.LName" />
+                <PropertyColumn Property="employee => employee.EmployeeType" />
 
-    <TemplateColumn Context="employee">
-        <a href="@($"employees/edit?employeeid={employee.EmployeeId}")">Edit</a> |
-        <a href="@($"employees/details?employeeid={employee.EmployeeId}")">Details</a> |
-        <a href="@($"employees/delete?employeeid={employee.EmployeeId}")">Delete</a>
-    </TemplateColumn>
-</QuickGrid>
+                <TemplateColumn Context="employee">
+                    <a href="@($"employees/edit?employeeid={employee.EmployeeId}")">Edit</a> |
+                    <a href="@($"employees/details?employeeid={employee.EmployeeId}")">Details</a> |
+                    <a href="@($"employees/delete?employeeid={employee.EmployeeId}")">Delete</a>
+                </TemplateColumn>
+            </QuickGrid>
+        </div>
+    </div>
+</div>
 
 @code {
     private ApplicationDbContext context = default!;
