@@ -11,11 +11,11 @@ namespace SpaFinal213.Models
         public int Customer_Id { get; set; }
 
         // FK to Identity user (AspNetUsers.Id is string)
-        [Required]
-        public string ApplicationUserId { get; set; }
+        // Make optional so anonymous customers can exist without a linked Identity user.
+        public string? ApplicationUserId { get; set; }
 
         [ForeignKey(nameof(ApplicationUserId))]
-        public ApplicationUser ApplicationUser { get; set; }
+        public ApplicationUser? ApplicationUser { get; set; }
 
         public string Fname { get; set; }
         public string Lname { get; set; }
