@@ -1,0 +1,110 @@
+﻿@page "/customers/edit"
+@using Microsoft.EntityFrameworkCore
+@using SpaFinal213.Models
+@inject IDbContextFactory<SpaFinal213.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Customer</h2>
+<hr />
+@if (Customer is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Customer" OnValidSubmit="UpdateCustomer" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Customer.Customer_Id" value="@Customer.Customer_Id" />
+                <div class="mb-3">
+                <span class="text-danger">*</span>
+                    <label for="applicationuserid" class="form-label">ApplicationUserId:</label>
+                    <InputText id="applicationuserid" @bind-Value="Customer.ApplicationUserId" class="form-control" aria-required="true"/>
+                    <ValidationMessage For="() => Customer.ApplicationUserId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="fname" class="form-label">Fname:</label>
+                    <InputText id="fname" @bind-Value="Customer.Fname" class="form-control" />
+                    <ValidationMessage For="() => Customer.Fname" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="lname" class="form-label">Lname:</label>
+                    <InputText id="lname" @bind-Value="Customer.Lname" class="form-control" />
+                    <ValidationMessage For="() => Customer.Lname" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Notes:</label>
+                    <InputText id="notes" @bind-Value="Customer.Notes" class="form-control" />
+                    <ValidationMessage For="() => Customer.Notes" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="dateaccount" class="form-label">DateAccount:</label>
+                    <InputDate id="dateaccount" @bind-Value="Customer.DateAccount" class="form-control" />
+                    <ValidationMessage For="() => Customer.DateAccount" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/customers">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Customer_Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Customer? Customer { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Customer ??= await context.Customer.FirstOrDefaultAsync(m => m.Customer_Id == Customer_Id);
+
+        if (Customer is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateCustomer()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Customer!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!CustomerExists(Customer!.Customer_Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/customers");
+    }
+
+    private bool CustomerExists(int customer_id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Customer.Any(e => e.Customer_Id == customer_id);
+    }
+}

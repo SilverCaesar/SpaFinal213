@@ -1,4 +1,6 @@
-﻿<nav class="navbar navbar-expand navbar-dark sticky-top"
+﻿@inject NavigationManager NavigationManager
+
+<nav class="navbar navbar-expand navbar-dark sticky-top"
      style="background-color: darkslategrey;">
     <div class="container-fluid d-flex align-items-center">
 
@@ -16,6 +18,7 @@
             <NavLink class="nav-link text-light me-5 fw-bold" href="/">Home</NavLink>
             <NavLink class="nav-link text-light me-5 fw-bold" href="/services">Services</NavLink>
             <NavLink class="nav-link text-light me-5 fw-bold" href="#">Reviews</NavLink>
+            <NavLink class="nav-link text-light me-5 fw-bold" href="/customerAppointment">Book Appointment</NavLink>
             <NavLink class="nav-link text-light me-5 fw-bold" href="/appointments">Appointments</NavLink>
             <NavLink class="nav-link text-light fw-bold" href="/employees">Employees</NavLink>
         </div>
@@ -23,8 +26,38 @@
 
         <!-- Right Auth Buttons -->
         <div class="d-flex align-items-center gap-2">
-            <a class="btn btn-sm btn-light border" href="/customers/create">Register</a>
-            <a class="btn btn-sm btn-light border" href="/login">Log In</a>
+            <!--<a class="btn btn-sm btn-light border" href="/customers/create">Register</a>
+            <a class="btn btn-sm btn-light border" href="/login">Log In</a>-->
+            <AuthorizeView>
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="Account/Manage">
+                            <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <form action="Account/Logout" method="post">
+                            <AntiforgeryToken />
+                            <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                            <button type="submit" class="nav-link">
+                                <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                            </button>
+                        </form>
+                    </div>
+                </Authorized>
+                <NotAuthorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="Account/Register">
+                            <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="Account/Login">
+                            <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                        </NavLink>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
         </div>
 
     </div>
@@ -32,7 +65,7 @@
 
 
 @code {
-    private string loginStatus = "Log In";
+   /* private string loginStatus = "Log In";
 
     private void updateLoginStatus()
     {
@@ -45,5 +78,23 @@
         {
             loginStatus = "Log In";
         }
+    }*/
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }

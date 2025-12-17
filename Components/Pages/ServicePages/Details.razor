@@ -1,0 +1,52 @@
+﻿@page "/services/details"
+@using Microsoft.EntityFrameworkCore
+@using SpaFinal213.Models
+@inject IDbContextFactory<SpaFinal213.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Service</h2>
+    <hr />
+    @if (service is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Name</dt>
+            <dd class="col-sm-10">@service.Name</dd>
+            <dt class="col-sm-2">Description</dt>
+            <dd class="col-sm-10">@service.Description</dd>
+            <dt class="col-sm-2">Price</dt>
+            <dd class="col-sm-10">@service.Price</dd>
+            <dt class="col-sm-2">Duration</dt>
+            <dd class="col-sm-10">@service.Duration</dd>
+        </dl>
+        <div>
+            <a href="@($"/services/edit?service_id={service.Service_Id}")">Edit</a> |
+            <a href="@($"/services")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Service? service;
+
+    [SupplyParameterFromQuery]
+    private int Service_Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        service = await context.Service.FirstOrDefaultAsync(m => m.Service_Id == Service_Id);
+
+        if (service is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

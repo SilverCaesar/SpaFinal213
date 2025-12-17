@@ -1,0 +1,44 @@
+﻿@page "/appointments"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using SpaFinal213.Models
+@using SpaFinal213.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<SpaFinal213.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="appointments/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Appointment">
+    <PropertyColumn Property="appointment => appointment.Customer_Id" />
+    <PropertyColumn Property="appointment => appointment.Employee_Id" />
+    <PropertyColumn Property="appointment => appointment.Service_Id" />
+    <PropertyColumn Property="appointment => appointment.Date" />
+    <PropertyColumn Property="appointment => appointment.Start" />
+    <PropertyColumn Property="appointment => appointment.Status" />
+    <PropertyColumn Property="appointment => appointment.Notes" />
+    <PropertyColumn Property="appointment => appointment.Price" />
+    <PropertyColumn Property="appointment => appointment.Duration" />
+
+    <TemplateColumn Context="appointment">
+        <a href="@($"appointments/edit?appointment_id={appointment.Appointment_Id}")">Edit</a> |
+        <a href="@($"appointments/details?appointment_id={appointment.Appointment_Id}")">Details</a> |
+        <a href="@($"appointments/delete?appointment_id={appointment.Appointment_Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private ApplicationDbContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}
