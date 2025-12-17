@@ -1,0 +1,40 @@
+﻿@page "/customers"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using SpaFinal213.Models
+@using SpaFinal213.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<SpaFinal213.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="customers/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Customer">
+    <PropertyColumn Property="customer => customer.ApplicationUserId" />
+    <PropertyColumn Property="customer => customer.Fname" />
+    <PropertyColumn Property="customer => customer.Lname" />
+    <PropertyColumn Property="customer => customer.Notes" />
+    <PropertyColumn Property="customer => customer.DateAccount" />
+
+    <TemplateColumn Context="customer">
+        <a href="@($"customers/edit?customer_id={customer.Customer_Id}")">Edit</a> |
+        <a href="@($"customers/details?customer_id={customer.Customer_Id}")">Details</a> |
+        <a href="@($"customers/delete?customer_id={customer.Customer_Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private ApplicationDbContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}
