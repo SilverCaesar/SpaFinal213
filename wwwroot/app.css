@@ -145,3 +145,88 @@ h1:focus { outline: none; }
 
 /* app root fallback */
 #app { min-height: 100vh; }
+
+/* =====================================
+   FIX BLAZOR LAYOUT OFFSET (HOME PAGE)
+   ===================================== */
+
+/* Remove layout padding that breaks centering */
+.page,
+.page > .content,
+.page main,
+.page article {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Ensure hero truly centers relative to viewport */
+.hero-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===== Panel styles: centered dark translucent backing + white cards ===== */
+.centered-panel {
+    position: relative;
+    max-width: 1100px;
+    width: calc(100% - 48px);
+    margin: 2rem auto;
+    padding: 1.25rem;
+    border-radius: 12px;
+    box-sizing: border-box;
+}
+
+/* dark translucent backing */
+.centered-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    border-radius: 12px;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* content above the backing */
+.centered-panel .panel-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: center;
+}
+
+/* white card used inside panels */
+.panel-card {
+    background: rgba(255,255,255,0.98);
+    padding: 1.25rem;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    color: #222;
+    min-width: 300px;
+    flex: 1 1 360px;
+}
+
+/* full width card variant */
+.panel-card.full {
+    flex: 1 1 100%;
+}
+
+/* Small screens: stack nicely */
+@media (max-width: 768px) {
+    .centered-panel {
+        width: calc(100% - 24px);
+        margin: 1rem auto;
+        padding: 1rem;
+    }
+    .centered-panel .panel-inner {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+}
