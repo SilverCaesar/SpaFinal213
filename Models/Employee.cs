@@ -12,7 +12,7 @@ namespace SpaFinal213.Models
 
         // FK to Identity user (AspNetUsers.Id is string)
         [Required]
-        public string ApplicationUserId { get; set; }
+        public string? ApplicationUserId { get; set; }
 
         [ForeignKey(nameof(ApplicationUserId))]
         public ApplicationUser? ApplicationUser { get; set; }
