@@ -1,0 +1,101 @@
+﻿@page "/OldServices"
+@rendermode InteractiveServer
+
+<PageTitle>Services</PageTitle>
+
+<div class="services-wrapper mt-5">
+    <div class="card centered-card shadow-lg border-0 rounded-4 overflow-hidden">
+
+        <div class="card-header bg-primary text-white text-center py-3">
+            <h3 class="mb-0">Our Services</h3>
+        </div>
+
+        <div class="card-body p-0">
+            <table class="table table-hover table-striped mb-0 custom-table w-100">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" class="ps-4">Service Name</th>
+                        <th scope="col">Description</th>
+                        <th scope="col" class="text-center">Duration</th>
+                        <th scope="col" class="text-end pe-4">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="fw-bold ps-4">Massage Therapy</td>
+                        <td>Relaxing full-body massage to relieve stress and tension.</td>
+                        <td class="text-center"><span class="badge bg-info text-dark">60 min</span></td>
+                        <td class="text-end fw-bold text-success pe-4">$80</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold ps-4">Signature Facial</td>
+                        <td>Rejuvenating treatment. Includes cleansing, exfoliation, and mask.</td>
+                        <td class="text-center"><span class="badge bg-info text-dark">60 min</span></td>
+                        <td class="text-end fw-bold text-success pe-4">$70</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold ps-4">Deep Tissue Massage</td>
+                        <td>Intense massage targeting the inner layers of your muscles.</td>
+                        <td class="text-center"><span class="badge bg-secondary">90 min</span></td>
+                        <td class="text-end fw-bold text-success pe-4">$110</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold ps-4">Hot Stone Therapy</td>
+                        <td>Smooth, heated stones placed on specific parts of the body.</td>
+                        <td class="text-center"><span class="badge bg-secondary">75 min</span></td>
+                        <td class="text-end fw-bold text-success pe-4">$130</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold ps-4">Aromatherapy</td>
+                        <td>Massage with highly concentrated plant oils (essential oils).</td>
+                        <td class="text-center"><span class="badge bg-info text-dark">45 min</span></td>
+                        <td class="text-end fw-bold text-success pe-4">$65</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold ps-4">Mani-Pedi Deluxe</td>
+                        <td>Complete nail care including soaking, exfoliation, and polish.</td>
+                        <td class="text-center"><span class="badge bg-info text-dark">60 min</span></td>
+                        <td class="text-end fw-bold text-success pe-4">$55</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Strong, reliable centering regardless of parent padding/width */
+    .services-wrapper {
+        width: 100%;
+        max-width: 960px;     /* visual constraint on large screens */
+        margin: 2rem auto 0;  /* centers the wrapper in the viewport */
+        padding: 0 1rem;      /* small horizontal gutter so content doesn't touch edges */
+        box-sizing: border-box;
+    }
+
+    .centered-card {
+        width: 100%;          /* fill the wrapper */
+    }
+
+    .custom-table tbody tr {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .custom-table tbody tr:hover {
+        background-color: #f8f9fa;
+        transform: scale(1.005);
+        z-index: 5;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .text-success {
+        color: #198754 !important;
+        font-size: 1.1rem;
+    }
+
+    }
+</style>
+
+@code {
+
+}

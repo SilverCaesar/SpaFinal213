@@ -1,0 +1,66 @@
+﻿@page "/make-appointment"
+@inject NavigationManager Navigation
+
+<!-- Page only accessible once logged in -->
+<h3>Book Your Appointment</h3>
+<br/>
+
+<div class="container-fluid">
+    <!-- Date -->
+    <div class="mb-3">
+        <label class="form-label">Appointment Date</label>
+        <input type="date" class="form-control" id="dateSelect" required>
+    </div>
+
+    <!-- Time -->
+    <div class="mb-3">
+        <label class="form-label">Appointment Time</label>
+        <input type="time" class="form-control" id="timeSelect" required>
+    </div>
+
+    <!-- Service -->
+    <!-- Services need to be changed once table is defined -->
+    <div class="mb-3">
+        <label class="form-label">Select Service</label>
+        <select class="form-select" id="serviceSelect" required>
+            <option value="">Choose...</option>
+            <option>Consultation</option>
+            <option>Follow-up</option>
+            <option>Massage Therapy</option>
+            <option>Haircut</option>
+        </select>
+    </div>
+
+    <!-- Notes -->
+    <div class="mb-3">
+        <label class="form-label">Additional Notes</label>
+        <textarea class="form-control" rows="3"></textarea>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="d-grid">
+        <button type="submit" class="btn btn-primary" id="appointmentSubmit">
+            Book Appointment
+        </button>
+    </div>
+</div>
+
+@code {
+
+    private void BookAppointment()
+    {
+        /*if (!AppointmentDate.HasValue || !AppointmentTime.HasValue || string.IsNullOrEmpty(SelectedService))
+        {
+            // Show an error (you could use a Bootstrap alert here)
+            Console.WriteLine("Please fill in all required fields.");
+            return;
+        }
+
+        // TODO: Save appointment to database or API
+        Console.WriteLine($"Appointment booked for {AppointmentDate} at {AppointmentTime} for {SelectedService}. Notes: {Notes}");
+
+        // Redirect to confirmation page
+        Navigation.NavigateTo("/appointment-confirmation");*/
+    }
+
+}

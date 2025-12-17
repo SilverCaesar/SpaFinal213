@@ -1,0 +1,48 @@
+﻿@page "/employee-dashboard"
+@inject NavigationManager Nav
+
+<h3 class="mb-4">Employee Dashboard</h3>
+
+<div class="container">
+    <div class="row">
+        <!-- Employee Schedule -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    My Schedule
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <!--foreach (var shift in employeeShifts)-->
+                        {
+                            <!-- Search for Appointments with employee/ Change for different employee role type -->
+                        }
+                        <!-- if (employeeShifts.Count == 0) -->
+                        {
+                            <li class="list-group-item">No shifts assigned.</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Appointments -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    Customer Appointments
+                </div>
+                <div class="card-body">
+                    <input class="form-control mb-2" placeholder="Search by customer name" />
+                    <ul class="list-group">
+                        <!-- Connect to Appointments Table-->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    
+}

@@ -1,0 +1,49 @@
+﻿<nav class="navbar navbar-expand navbar-dark sticky-top"
+     style="background-color: darkslategrey;">
+    <div class="container-fluid d-flex align-items-center">
+
+        <!-- Brand -->
+        <a class="navbar-brand"
+           href="/"
+           style="font-family:'Old English Text MT'; font-size: 32pt;">
+            SpaFinal213
+        </a>
+
+
+        <!-- Left Links -->
+        <div class="d-flex ms-4 align-items-center flex-grow-1" 
+            style="font-family: Monaco, Menlo, Consolas, 'Courier New', monospace; font-size:20px;">
+            <NavLink class="nav-link text-light me-5 fw-bold" href="/">Home</NavLink>
+            <NavLink class="nav-link text-light me-5 fw-bold" href="/services">Services</NavLink>
+            <NavLink class="nav-link text-light me-5 fw-bold" href="#">Reviews</NavLink>
+            <NavLink class="nav-link text-light me-5 fw-bold" href="/appointments">Appointments</NavLink>
+            <NavLink class="nav-link text-light fw-bold" href="/employees">Employees</NavLink>
+        </div>
+
+
+        <!-- Right Auth Buttons -->
+        <div class="d-flex align-items-center gap-2">
+            <a class="btn btn-sm btn-light border" href="/customers/create">Register</a>
+            <a class="btn btn-sm btn-light border" href="/login">Log In</a>
+        </div>
+
+    </div>
+</nav>
+
+
+@code {
+    private string loginStatus = "Log In";
+
+    private void updateLoginStatus()
+    {
+        // Placeholder logic for login status
+        if(loginStatus == "Log In")
+        {
+            loginStatus = "Log Out";
+        }
+        else
+        {
+            loginStatus = "Log In";
+        }
+    }
+}
