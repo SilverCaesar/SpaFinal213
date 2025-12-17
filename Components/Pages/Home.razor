@@ -1,46 +1,43 @@
-﻿
-
-@page "/"
+﻿@page "/"
 
 <PageTitle>Home</PageTitle>
 
-<img src= "images\SpaImage.png" class="img-fluid px-0" />
+<div class="hero-section">
+    <div class="hero-bg" aria-hidden="true"></div>
 
-<div class="container-fluid" id="homeBody">
-    <div class="row">
-        <div class="col" style="border:solid">
-            <h3>Scheduling your Spa Day!</h3>
-            <p>To schedule your spa day, please log in or contact our spa at (701)867-5309! Then come to our location at 1600 Pennsylvania Avenue NW and prepare
-                to be pampered like never before! We look forward to seeing you!
-            </p>
-        </div>
-        <div class="col offset-md-2" style="border:solid">
-            <h3>Our Services</h3>
-            <ul>
-                <li>Massage Therapy</li>
-                <li>Facials</li>
-                <li>Body Treatments</li>
-                <li>Nail Services</li>
-                <li>Hair Removal</li>
-                <li>And More! Check out our <a href="services">Services</a> page for more info!</li>
-            </ul>
-        </div>
-    </div>
-    <div class="row">
-        <h3>New to us?</h3>
-        <p>Simply make an account to start booking appointments with our specialists!</p>
+    <div class="hero-center">
+        <div class="hero-cards">
+            <!-- Left card -->
+            <div class="hero-card-inner">
+                <h2>Schedule Your Spa Day</h2>
+                <p>
+                    Relax, refresh, and rejuvenate. Log in or contact us at
+                    <strong>(701) 867-5309</strong> to book your spa experience.
+                </p>
+                <a class="btn btn-outline-dark" href="/login">Login to Book</a>
+            </div>
 
-        <a class="btn btn-primary" href="error" role="button">Create Account</a>
+            <!-- Right card -->
+            <div class="hero-card-inner">
+                <h3>Our Services</h3>
+                <ul>
+                    <li>Massage Therapy</li>
+                    <li>Facials</li>
+                    <li>Body Treatments</li>
+                    <li>Nail Services</li>
+                    <li>Hair Removal</li>
+                    <li>More on our <a href="/services">Services</a> page</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Full width card below -->
+        <div class="hero-card-inner hero-card-full">
+            <h3 class="text-center mb-3">New to Us?</h3>
+            <p class="text-center">Create an account and start booking today.</p>
+            <div class="text-center mt-3">
+                <a class="btn btn-success" href="/customers/create">Create Account</a>
+            </div>
+        </div>
     </div>
 </div>
-
-<footer class="footer mt-auto py-3 bg-light">
-    <div class="container">
-        <div class="col">
-            <p class="text-muted">© 2024 Spa Day. All rights reserved.</p>
-        </div>
-        <div class="col">
-            <p class="text-muted">Contact us: (701)867-5309 </p>
-        </div>
-    </div>
-</footer>
