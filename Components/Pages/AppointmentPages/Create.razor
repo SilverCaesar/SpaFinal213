@@ -1,0 +1,86 @@
+﻿@page "/appointments/create"
+@using Microsoft.EntityFrameworkCore
+@using SpaFinal213.Models
+@inject IDbContextFactory<SpaFinal213.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Appointment</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Appointment" OnValidSubmit="AddAppointment" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="customer_id" class="form-label">Customer_Id:</label> 
+                <InputNumber id="customer_id" @bind-Value="Appointment.Customer_Id" class="form-control" /> 
+                <ValidationMessage For="() => Appointment.Customer_Id" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="employee_id" class="form-label">Employee_Id:</label> 
+                <InputNumber id="employee_id" @bind-Value="Appointment.Employee_Id" class="form-control" /> 
+                <ValidationMessage For="() => Appointment.Employee_Id" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="service_id" class="form-label">Service_Id:</label> 
+                <InputNumber id="service_id" @bind-Value="Appointment.Service_Id" class="form-control" /> 
+                <ValidationMessage For="() => Appointment.Service_Id" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="date" class="form-label">Date:</label> 
+                <InputDate id="date" @bind-Value="Appointment.Date" class="form-control" /> 
+                <ValidationMessage For="() => Appointment.Date" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="start" class="form-label">Start:</label> 
+                <InputDate id="start" @bind-Value="Appointment.Start" class="form-control" /> 
+                <ValidationMessage For="() => Appointment.Start" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="status" class="form-label">Status:</label> 
+                <InputText id="status" @bind-Value="Appointment.Status" class="form-control" /> 
+                <ValidationMessage For="() => Appointment.Status" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes:</label> 
+                <InputText id="notes" @bind-Value="Appointment.Notes" class="form-control" /> 
+                <ValidationMessage For="() => Appointment.Notes" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="price" class="form-label">Price:</label> 
+                <InputNumber id="price" @bind-Value="Appointment.Price" class="form-control" /> 
+                <ValidationMessage For="() => Appointment.Price" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="duration" class="form-label">Duration:</label> 
+                <InputNumber id="duration" @bind-Value="Appointment.Duration" class="form-control" /> 
+                <ValidationMessage For="() => Appointment.Duration" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/appointments">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Appointment Appointment { get; set; } = default!;
+
+    protected override void OnInitialized() => Appointment ??= new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddAppointment()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Appointment.Add(Appointment);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/appointments");
+    }
+}
