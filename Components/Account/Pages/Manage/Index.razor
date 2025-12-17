@@ -1,12 +1,14 @@
 ﻿@page "/Account/Manage"
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
 @using SpaFinal213.Data
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
 @inject RoleManager<IdentityRole> RoleManager
 @inject IdentityUserAccessor UserAccessor
 @inject NavigationManager Navigation
+@inject ApplicationDbContext Db
 
 <PageTitle>Profile</PageTitle>
 
@@ -19,7 +21,7 @@
 
 <div class="row">
     <div class="col-xl-6">
-        <EditForm Model="Input" OnValidSubmit="OnValidSubmitAsync">
+        <EditForm Model="Input" OnValidSubmit="OnValidSubmitAsync" FormName="ProfileForm">
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" />
 
@@ -107,38 +109,15 @@
                 PhoneNumber = Input.PhoneNumber;
             }
 
-            // Remove other roles
-            var currentRoles = (await UserManager.GetRolesAsync(appUser)).ToList();
+            // Ensure the selected role exists
             var selected = Input.SelectedRole?.Trim() ?? string.Empty;
-
-            var rolesToRemove = currentRoles
-                .Where(r => r == "Customer" || r == "Employee")
-                .Where(r => r != selected)
-                .ToList();
-
-            if (rolesToRemove.Any())
+            if (!string.IsNullOrEmpty(selected))
             {
-                var removeResult = await UserManager.RemoveFromRolesAsync(appUser, rolesToRemove);
-                if (!removeResult.Succeeded)
-                {
-                    StatusMessage = $"Error removing roles: {string.Join(", ", removeResult.Errors.Select(e => e.Description))}";
-                    return;
-                }
+                await EnsureRoleExistsAsync(selected);
             }
 
-            // Refresh roles after removal
-            currentRoles = (await UserManager.GetRolesAsync(appUser)).ToList();
-
-            // Add selected role if not already assigned
-            if (!string.IsNullOrEmpty(selected) && !currentRoles.Contains(selected))
-            {
-                var addResult = await UserManager.AddToRoleAsync(appUser, selected);
-                if (!addResult.Succeeded)
-                {
-                    StatusMessage = $"Error adding role '{selected}': {string.Join(", ", addResult.Errors.Select(e => e.Description))}";
-                    return;
-                }
-            }
+            // Directly update AspNetUserRoles (explicit EF approach)
+            await UpdateAspNetUserRolesDirectAsync(appUser, selected);
 
             // Refresh sign-in
             await SignInManager.RefreshSignInAsync(appUser);
@@ -158,6 +137,57 @@
         {
             await RoleManager.CreateAsync(new IdentityRole(roleName));
         }
+    }
+
+    private async Task UpdateAspNetUserRolesDirectAsync(ApplicationUser appUser, string selectedRole)
+    {
+        // Roles to consider as mutually exclusive
+        var mutuallyExclusive = new[] { "Customer", "Employee" };
+
+        // Load roles metadata for the mutually exclusive set
+        var roles = await Db.Set<IdentityRole>()
+            .Where(r => mutuallyExclusive.Contains(r.Name))
+            .ToListAsync();
+
+        // Remove rows for roles we don't want
+        var rolesToRemove = roles.Where(r => r.Name != selectedRole).Select(r => r.Id).ToList();
+
+        var userRoles = Db.Set<IdentityUserRole<string>>();
+
+        var entriesToRemove = await userRoles
+            .Where(ur => ur.UserId == appUser.Id && rolesToRemove.Contains(ur.RoleId))
+            .ToListAsync();
+
+        if (entriesToRemove.Any())
+            userRoles.RemoveRange(entriesToRemove);
+
+        // Add selected role row if requested and not already present
+        if (!string.IsNullOrEmpty(selectedRole))
+        {
+            var role = roles.FirstOrDefault(r => r.Name == selectedRole)
+                       ?? await Db.Set<IdentityRole>().FirstOrDefaultAsync(r => r.Name == selectedRole);
+
+            if (role != null)
+            {
+                var exists = await userRoles.AnyAsync(ur => ur.UserId == appUser.Id && ur.RoleId == role.Id);
+                if (!exists)
+                {
+                    userRoles.Add(new IdentityUserRole<string> { UserId = appUser.Id, RoleId = role.Id });
+                }
+            }
+            else
+            {
+                // If role doesn't exist in Roles table, create it via RoleManager to keep consistency
+                var createResult = await RoleManager.CreateAsync(new IdentityRole(selectedRole));
+                if (createResult.Succeeded)
+                {
+                    var createdRole = await Db.Set<IdentityRole>().FirstAsync(r => r.Name == selectedRole);
+                    userRoles.Add(new IdentityUserRole<string> { UserId = appUser.Id, RoleId = createdRole.Id });
+                }
+            }
+        }
+
+        await Db.SaveChangesAsync();
     }
 
     private class InputModel

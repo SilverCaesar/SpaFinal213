@@ -18,15 +18,9 @@
             <NavLink class="nav-link text-light me-5 fw-bold" href="/">Home</NavLink>
             <NavLink class="nav-link text-light me-5 fw-bold" href="/services">Services</NavLink>
             <NavLink class="nav-link text-light me-5 fw-bold" href="#">Reviews</NavLink>
-            <AuthorizeView Roles="Customer">
+            <AuthorizeView>
                 <Authorized>
                     <NavLink class="nav-link text-light me-5 fw-bold" href="/customerProfile">My Profile</NavLink>
-                    <NavLink class="nav-link text-light me-5 fw-bold" href="/customerAppointment">Book Appointment</NavLink>
-                </Authorized>
-            </AuthorizeView>
-            
-            <AuthorizeView Roles="Employee">
-                <Authorized>
                     <NavLink class="nav-link text-light me-5 fw-bold" href="/customers">Customers</NavLink>
                     <NavLink class="nav-link text-light me-5 fw-bold" href="/appointments">Appointments</NavLink>
                     <NavLink class="nav-link text-light fw-bold" href="/employees">Employees</NavLink>
