@@ -35,11 +35,12 @@ namespace SpaFinal213.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             // One-to-one: Customer <-> ApplicationUser
+            // ApplicationUserId is optional now so anonymous customers are allowed.
             modelBuilder.Entity<Customer>()
                 .HasOne(c => c.ApplicationUser)
                 .WithOne(u => u.CustomerProfile)
                 .HasForeignKey<Customer>(c => c.ApplicationUserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
 
             // One-to-one: Employee <-> ApplicationUser
             modelBuilder.Entity<Employee>()
