@@ -32,24 +32,24 @@
 
         <!-- Right Auth Buttons -->
         <div class="d-flex align-items-center gap-2">
-            <!--<a class="btn btn-sm btn-light border" href="/customers/create">Register</a>
-            <a class="btn btn-sm btn-light border" href="/login">Log In</a>-->
             <AuthorizeView>
                 <Authorized>
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="Account/Manage">
-                            <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
-                        </NavLink>
-                    </div>
-                    <div class="nav-item px-3">
-                        <form action="Account/Logout" method="post">
-                            <AntiforgeryToken />
-                            <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                            <button type="submit" class="nav-link">
-                                <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
-                            </button>
-                        </form>
-                    </div>
+                    <!-- Match font/spacing of left links when user is logged in -->
+                    <NavLink class="nav-link text-light me-5 fw-bold"
+                             style="font-family: Monaco, Menlo, Consolas, 'Courier New', monospace; font-size:20px;"
+                             href="Account/Manage">
+                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
+                    </NavLink>
+
+                    <form action="Account/Logout" method="post" class="d-inline">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                        <button type="submit"
+                                class="nav-link text-light me-5 fw-bold"
+                                style="font-family: Monaco, Menlo, Consolas, 'Courier New', monospace; font-size:20px; background:none; border:none; padding:0;">
+                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                        </button>
+                    </form>
                 </Authorized>
                 <NotAuthorized>
                     <!-- Render Register/Login with same font sizing as left links -->
@@ -72,20 +72,6 @@
 
 
 @code {
-   /* private string loginStatus = "Log In";
-
-    private void updateLoginStatus()
-    {
-        // Placeholder logic for login status
-        if(loginStatus == "Log In")
-        {
-            loginStatus = "Log Out";
-        }
-        else
-        {
-            loginStatus = "Log In";
-        }
-    }*/
     private string? currentUrl;
 
     protected override void OnInitialized()
