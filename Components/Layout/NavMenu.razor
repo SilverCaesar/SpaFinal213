@@ -52,16 +52,17 @@
                     </div>
                 </Authorized>
                 <NotAuthorized>
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="Account/Register">
-                            <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
-                        </NavLink>
-                    </div>
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="Account/Login">
-                            <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
-                        </NavLink>
-                    </div>
+                    <!-- Render Register/Login with same font sizing as left links -->
+                    <NavLink class="nav-link text-light me-5 fw-bold"
+                             style="font-family: Monaco, Menlo, Consolas, 'Courier New', monospace; font-size:20px;"
+                             href="Account/Register">
+                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                    </NavLink>
+                    <NavLink class="nav-link text-light me-5 fw-bold"
+                             style="font-family: Monaco, Menlo, Consolas, 'Courier New', monospace; font-size:20px;"
+                             href="Account/Login">
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                    </NavLink>
                 </NotAuthorized>
             </AuthorizeView>
         </div>
