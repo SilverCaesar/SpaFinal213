@@ -145,3 +145,26 @@ h1:focus { outline: none; }
 
 /* app root fallback */
 #app { min-height: 100vh; }
+
+/* =====================================
+   FIX BLAZOR LAYOUT OFFSET (HOME PAGE)
+   ===================================== */
+
+/* Remove layout padding that breaks centering */
+.page,
+.page > .content,
+.page main,
+.page article {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Ensure hero truly centers relative to viewport */
+.hero-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
