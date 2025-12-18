@@ -1,41 +1,68 @@
 ﻿@page "/customers/details"
 @using Microsoft.EntityFrameworkCore
+@using SpaFinal213.Components.Shared
 @using SpaFinal213.Models
 @inject IDbContextFactory<SpaFinal213.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
 <PageTitle>Details</PageTitle>
 
-<h1>Details</h1>
+<div class="centered-panel">
+    <div class="panel-inner">
+        <div class="panel-card" style="flex: 1 1 520px;">
+            <h1>Details</h1>
 
-<div>
-    <h2>Customer</h2>
-    <hr />
-    @if (customer is null)
-    {
-        <p><em>Loading...</em></p>
-    }
-    else {
-        <dl class="row">
-            <dt class="col-sm-2">ApplicationUserId</dt>
-            <dd class="col-sm-10">@customer.ApplicationUserId</dd>
-            <dt class="col-sm-2">Fname</dt>
-            <dd class="col-sm-10">@customer.Fname</dd>
-            <dt class="col-sm-2">Lname</dt>
-            <dd class="col-sm-10">@customer.Lname</dd>
-            <dt class="col-sm-2">Notes</dt>
-            <dd class="col-sm-10">@customer.Notes</dd>
-            <dt class="col-sm-2">DateAccount</dt>
-            <dd class="col-sm-10">@customer.DateAccount</dd>
-        </dl>
-        <div>
-            <a href="@($"/customers/edit?customer_id={customer.Customer_Id}")">Edit</a> |
-            <a href="@($"/customers")">Back to List</a>
+            <section>
+                <StatusMessage Message="@ErrorMessage" />
+
+                @if (!string.IsNullOrEmpty(ErrorMessage))
+                {
+                    <div class="text-danger">@ErrorMessage</div>
+                }
+                else if (customer is null)
+                {
+                    <p><em>Loading...</em></p>
+                }
+                else
+                {
+                    <h2>Customer</h2>
+                    <hr />
+                    <dl class="row">
+                        <dt class="col-sm-3">Application User Id</dt>
+                        <dd class="col-sm-9">@customer.ApplicationUserId</dd>
+
+                        <dt class="col-sm-3">Name</dt>
+                        <dd class="col-sm-9">@($"{customer.Fname} {customer.Lname}")</dd>
+
+                        <dt class="col-sm-3">Notes</dt>
+                        <dd class="col-sm-9">@customer.Notes</dd>
+
+                        <dt class="col-sm-3">Account date</dt>
+                        <dd class="col-sm-9">@customer.DateAccount.ToString("MMM d, yyyy")</dd>
+                    </dl>
+
+                    <div class="mt-2">
+                        <a class="btn btn-sm btn-secondary me-2" href="@($"/customers/edit?customer_id={customer.Customer_Id}")">Edit</a>
+                        <a class="btn btn-sm btn-outline-secondary" href="/customers">Back to List</a>
+                    </div>
+                }
+            </section>
         </div>
-    }
+
+        <div class="panel-card" style="flex: 0 0 320px;">
+            <section>
+                <h3>Quick links & help</h3>
+                <hr />
+                <p><a class="btn btn-sm btn-secondary mb-2" href="/customers/create">Create Customer</a></p>
+                <p><a class="btn btn-sm btn-secondary mb-2" href="/customers">View Customers</a></p>
+                <p><a class="btn btn-sm btn-outline-secondary" href="/customers">Back to List</a></p>
+            </section>
+        </div>
+    </div>
 </div>
 
 @code {
+    private string? ErrorMessage;
     private Customer? customer;
 
     [SupplyParameterFromQuery]
@@ -43,12 +70,22 @@
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-        customer = await context.Customer.FirstOrDefaultAsync(m => m.Customer_Id == Customer_Id);
+        ErrorMessage = null;
 
-        if (customer is null)
+        try
         {
-            NavigationManager.NavigateTo("notfound");
+            using var context = DbFactory.CreateDbContext();
+            customer = await context.Customer.FirstOrDefaultAsync(m => m.Customer_Id == Customer_Id);
+
+            if (customer is null)
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "An error occurred while loading the customer details.";
+            Console.Error.WriteLine(ex);
         }
     }
 }

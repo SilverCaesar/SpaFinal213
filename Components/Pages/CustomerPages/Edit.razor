@@ -1,64 +1,90 @@
 ﻿@page "/customers/edit"
 @using Microsoft.EntityFrameworkCore
+@using SpaFinal213.Components.Shared
 @using SpaFinal213.Models
 @inject IDbContextFactory<SpaFinal213.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
 <PageTitle>Edit</PageTitle>
 
-<h1>Edit</h1>
+<div class="centered-panel">
+    <div class="panel-inner">
+        <div class="panel-card" style="flex: 1 1 520px;">
+            <h1>Edit</h1>
 
-<h2>Customer</h2>
-<hr />
-@if (Customer is null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <div class="row">
-        <div class="col-md-4">
-            <EditForm method="post" Model="Customer" OnValidSubmit="UpdateCustomer" FormName="edit" Enhance>
-                <DataAnnotationsValidator />
-                <ValidationSummary role="alert"/>
-                <input type="hidden" name="Customer.Customer_Id" value="@Customer.Customer_Id" />
-                <div class="mb-3">
-                <span class="text-danger">*</span>
-                    <label for="applicationuserid" class="form-label">ApplicationUserId:</label>
-                    <InputText id="applicationuserid" @bind-Value="Customer.ApplicationUserId" class="form-control" aria-required="true"/>
-                    <ValidationMessage For="() => Customer.ApplicationUserId" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="fname" class="form-label">Fname:</label>
-                    <InputText id="fname" @bind-Value="Customer.Fname" class="form-control" />
-                    <ValidationMessage For="() => Customer.Fname" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="lname" class="form-label">Lname:</label>
-                    <InputText id="lname" @bind-Value="Customer.Lname" class="form-control" />
-                    <ValidationMessage For="() => Customer.Lname" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="notes" class="form-label">Notes:</label>
-                    <InputText id="notes" @bind-Value="Customer.Notes" class="form-control" />
-                    <ValidationMessage For="() => Customer.Notes" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="dateaccount" class="form-label">DateAccount:</label>
-                    <InputDate id="dateaccount" @bind-Value="Customer.DateAccount" class="form-control" />
-                    <ValidationMessage For="() => Customer.DateAccount" class="text-danger" />
-                </div>
-                <button type="submit" class="btn btn-primary">Save</button>
-            </EditForm>
+            <section>
+                <StatusMessage Message="@ErrorMessage" />
+
+                @if (!string.IsNullOrEmpty(ErrorMessage))
+                {
+                    <div class="text-danger">@ErrorMessage</div>
+                }
+                else if (Customer is null)
+                {
+                    <p><em>Loading...</em></p>
+                }
+                else
+                {
+                    <EditForm method="post" Model="Customer" OnValidSubmit="UpdateCustomer" FormName="edit" Enhance>
+                        <DataAnnotationsValidator />
+                        <h2>Customer</h2>
+                        <hr />
+                        <ValidationSummary role="alert" />
+                        <input type="hidden" name="Customer.Customer_Id" value="@Customer.Customer_Id" />
+
+                        <div class="mb-3">
+                            <label for="applicationuserid" class="form-label">Application User Id</label>
+                            <InputText id="applicationuserid" @bind-Value="Customer.ApplicationUserId" class="form-control" />
+                            <ValidationMessage For="() => Customer.ApplicationUserId" class="text-danger" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fname" class="form-label">First name</label>
+                            <InputText id="fname" @bind-Value="Customer.Fname" class="form-control" />
+                            <ValidationMessage For="() => Customer.Fname" class="text-danger" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="lname" class="form-label">Last name</label>
+                            <InputText id="lname" @bind-Value="Customer.Lname" class="form-control" />
+                            <ValidationMessage For="() => Customer.Lname" class="text-danger" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <InputText id="notes" @bind-Value="Customer.Notes" class="form-control" />
+                            <ValidationMessage For="() => Customer.Notes" class="text-danger" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="dateaccount" class="form-label">Account date</label>
+                            <InputDate id="dateaccount" @bind-Value="Customer.DateAccount" class="form-control" />
+                            <ValidationMessage For="() => Customer.DateAccount" class="text-danger" />
+                        </div>
+
+                        <div class="mt-2">
+                            <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+                        </div>
+                    </EditForm>
+                }
+            </section>
+        </div>
+
+        <div class="panel-card" style="flex: 0 0 320px;">
+            <section>
+                <h3>Quick links & help</h3>
+                <hr />
+                <p><a class="btn btn-sm btn-secondary mb-2" href="/customers/create">Create Customer</a></p>
+                <p><a class="btn btn-sm btn-secondary mb-2" href="/customers">View Customers</a></p>
+                <p><a class="btn btn-sm btn-outline-secondary" href="/customers">Back to List</a></p>
+            </section>
         </div>
     </div>
-}
-
-<div>
-    <a href="/customers">Back to List</a>
 </div>
 
 @code {
+    private string? ErrorMessage;
+
     [SupplyParameterFromQuery]
     private int Customer_Id { get; set; }
 
@@ -67,39 +93,58 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-        Customer ??= await context.Customer.FirstOrDefaultAsync(m => m.Customer_Id == Customer_Id);
-
-        if (Customer is null)
-        {
-            NavigationManager.NavigateTo("notfound");
-        }
-    }
-
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
-    private async Task UpdateCustomer()
-    {
-        using var context = DbFactory.CreateDbContext();
-        context.Attach(Customer!).State = EntityState.Modified;
+        ErrorMessage = null;
 
         try
         {
+            using var context = DbFactory.CreateDbContext();
+            Customer ??= await context.Customer.FirstOrDefaultAsync(m => m.Customer_Id == Customer_Id);
+
+            if (Customer is null)
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "An error occurred while loading the customer.";
+            Console.Error.WriteLine(ex);
+        }
+    }
+
+    private async Task UpdateCustomer()
+    {
+        ErrorMessage = null;
+
+        if (Customer is null)
+        {
+            ErrorMessage = "Customer not found.";
+            return;
+        }
+
+        try
+        {
+            using var context = DbFactory.CreateDbContext();
+            context.Attach(Customer).State = EntityState.Modified;
             await context.SaveChangesAsync();
+            NavigationManager.NavigateTo("/customers");
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!CustomerExists(Customer!.Customer_Id))
+            if (!CustomerExists(Customer.Customer_Id))
             {
                 NavigationManager.NavigateTo("notfound");
             }
             else
             {
-                throw;
+                ErrorMessage = "The record was modified by another user. Please reload and try again.";
             }
         }
-
-        NavigationManager.NavigateTo("/customers");
+        catch (Exception ex)
+        {
+            ErrorMessage = "An error occurred while saving the customer.";
+            Console.Error.WriteLine(ex);
+        }
     }
 
     private bool CustomerExists(int customer_id)

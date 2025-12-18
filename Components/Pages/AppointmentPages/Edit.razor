@@ -1,83 +1,106 @@
 ﻿@page "/appointments/edit"
 @using Microsoft.EntityFrameworkCore
+@using SpaFinal213.Components.Shared
 @using SpaFinal213.Models
 @inject IDbContextFactory<SpaFinal213.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
 <PageTitle>Edit</PageTitle>
 
-<h1>Edit</h1>
+<div class="centered-panel">
+    <div class="panel-inner">
+        <div class="panel-card" style="flex: 1 1 520px;">
+            <h1>Edit</h1>
 
-<h2>Appointment</h2>
-<hr />
-@if (Appointment is null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <div class="row">
-        <div class="col-md-4">
-            <EditForm method="post" Model="Appointment" OnValidSubmit="UpdateAppointment" FormName="edit" Enhance>
-                <DataAnnotationsValidator />
-                <ValidationSummary role="alert"/>
-                <input type="hidden" name="Appointment.Appointment_Id" value="@Appointment.Appointment_Id" />
-                <div class="mb-3">
-                    <label for="customer_id" class="form-label">Customer_Id:</label>
-                    <InputNumber id="customer_id" @bind-Value="Appointment.Customer_Id" class="form-control" />
-                    <ValidationMessage For="() => Appointment.Customer_Id" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="employee_id" class="form-label">Employee_Id:</label>
-                    <InputNumber id="employee_id" @bind-Value="Appointment.Employee_Id" class="form-control" />
-                    <ValidationMessage For="() => Appointment.Employee_Id" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="service_id" class="form-label">Service_Id:</label>
-                    <InputNumber id="service_id" @bind-Value="Appointment.Service_Id" class="form-control" />
-                    <ValidationMessage For="() => Appointment.Service_Id" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="date" class="form-label">Date:</label>
-                    <InputDate id="date" @bind-Value="Appointment.Date" class="form-control" />
-                    <ValidationMessage For="() => Appointment.Date" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="start" class="form-label">Start:</label>
-                    <InputDate id="start" @bind-Value="Appointment.Start" class="form-control" />
-                    <ValidationMessage For="() => Appointment.Start" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="status" class="form-label">Status:</label>
-                    <InputText id="status" @bind-Value="Appointment.Status" class="form-control" />
-                    <ValidationMessage For="() => Appointment.Status" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="notes" class="form-label">Notes:</label>
-                    <InputText id="notes" @bind-Value="Appointment.Notes" class="form-control" />
-                    <ValidationMessage For="() => Appointment.Notes" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="price" class="form-label">Price:</label>
-                    <InputNumber id="price" @bind-Value="Appointment.Price" class="form-control" />
-                    <ValidationMessage For="() => Appointment.Price" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="duration" class="form-label">Duration:</label>
-                    <InputNumber id="duration" @bind-Value="Appointment.Duration" class="form-control" />
-                    <ValidationMessage For="() => Appointment.Duration" class="text-danger" />
-                </div>
-                <button type="submit" class="btn btn-primary">Save</button>
-            </EditForm>
+            <section>
+                <StatusMessage Message="@ErrorMessage" />
+                @if (Appointment is null)
+                {
+                    <p><em>Loading...</em></p>
+                }
+                else
+                {
+                    <EditForm method="post" Model="Appointment" OnValidSubmit="UpdateAppointment" FormName="edit" Enhance>
+                        <DataAnnotationsValidator />
+                        <h2>Appointment</h2>
+                        <hr />
+                        <ValidationSummary role="alert"/>
+                        <input type="hidden" name="Appointment.Appointment_Id" value="@Appointment.Appointment_Id" />
+                        <div class="mb-3">
+                            <label for="customer_id" class="form-label">Customer_Id:</label>
+                            <InputNumber id="customer_id" @bind-Value="Appointment.Customer_Id" class="form-control" />
+                            <ValidationMessage For="() => Appointment.Customer_Id" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="employee_id" class="form-label">Employee_Id:</label>
+                            <InputNumber id="employee_id" @bind-Value="Appointment.Employee_Id" class="form-control" />
+                            <ValidationMessage For="() => Appointment.Employee_Id" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="service_id" class="form-label">Service_Id:</label>
+                            <InputNumber id="service_id" @bind-Value="Appointment.Service_Id" class="form-control" />
+                            <ValidationMessage For="() => Appointment.Service_Id" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="date" class="form-label">Date:</label>
+                            <InputDate id="date" @bind-Value="Appointment.Date" class="form-control" />
+                            <ValidationMessage For="() => Appointment.Date" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="start" class="form-label">Start:</label>
+                            <InputDate id="start" @bind-Value="Appointment.Start" class="form-control" />
+                            <ValidationMessage For="() => Appointment.Start" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status:</label>
+                            <InputText id="status" @bind-Value="Appointment.Status" class="form-control" />
+                            <ValidationMessage For="() => Appointment.Status" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes:</label>
+                            <InputText id="notes" @bind-Value="Appointment.Notes" class="form-control" />
+                            <ValidationMessage For="() => Appointment.Notes" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="price" class="form-label">Price:</label>
+                            <InputNumber id="price" @bind-Value="Appointment.Price" class="form-control" />
+                            <ValidationMessage For="() => Appointment.Price" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="duration" class="form-label">Duration:</label>
+                            <InputNumber id="duration" @bind-Value="Appointment.Duration" class="form-control" />
+                            <ValidationMessage For="() => Appointment.Duration" class="text-danger" />
+                        </div>
+
+                        <div class="mt-2">
+                            <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+                        </div>
+                    </EditForm>
+                }
+            </section>
+        </div>
+
+        <div class="panel-card" style="flex: 0 0 320px;">
+            <section>
+                <h3>Quick links & help</h3>
+                <hr />
+                <p>
+                    <a class="btn btn-sm btn-secondary mb-2" href="/appointments/create">Create Appointment</a>
+                </p>
+                <p>
+                    <a class="btn btn-sm btn-secondary mb-2" href="/appointments">View Appointments</a>
+                </p>
+                <p>
+                    <a class="btn btn-sm btn-outline-secondary" href="/appointments">Back to List</a>
+                </p>
+            </section>
         </div>
     </div>
-}
-
-<div>
-    <a href="/appointments">Back to List</a>
 </div>
 
 @code {
+    private string? ErrorMessage;
+
     [SupplyParameterFromQuery]
     private int Appointment_Id { get; set; }
 
@@ -99,12 +122,14 @@ else
     // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task UpdateAppointment()
     {
-        using var context = DbFactory.CreateDbContext();
-        context.Attach(Appointment!).State = EntityState.Modified;
+        ErrorMessage = null;
 
         try
         {
+            using var context = DbFactory.CreateDbContext();
+            context.Attach(Appointment!).State = EntityState.Modified;
             await context.SaveChangesAsync();
+            NavigationManager.NavigateTo("/appointments");
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -114,11 +139,14 @@ else
             }
             else
             {
-                throw;
+                ErrorMessage = "The record was modified by another user. Please reload and try again.";
             }
         }
-
-        NavigationManager.NavigateTo("/appointments");
+        catch (Exception ex)
+        {
+            ErrorMessage = "An error occurred while saving the appointment.";
+            Console.Error.WriteLine(ex);
+        }
     }
 
     private bool AppointmentExists(int appointment_id)

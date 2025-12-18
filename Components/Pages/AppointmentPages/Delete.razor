@@ -1,66 +1,93 @@
 ﻿@page "/appointments/delete"
 @using Microsoft.EntityFrameworkCore
+@using SpaFinal213.Components.Shared
 @using SpaFinal213.Models
 @inject IDbContextFactory<SpaFinal213.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
 <PageTitle>Delete</PageTitle>
 
-<h1>Delete</h1>
+<div class="centered-panel">
+    <div class="panel-inner">
+        <div class="panel-card" style="flex: 1 1 520px;">
+            <h1>Delete</h1>
 
-<p>Are you sure you want to delete this?</p>
-<div>
-    <h2>Appointment</h2>
-    <hr />
-    @if (appointment is null)
-    {
-        <p><em>Loading...</em></p>
-    }
-    else {
-        <dl class="row">
-            <dt class="col-sm-2">Customer_Id</dt>
-            <dd class="col-sm-10">@appointment.Customer_Id</dd>
-        </dl>
-        <dl class="row">
-            <dt class="col-sm-2">Employee_Id</dt>
-            <dd class="col-sm-10">@appointment.Employee_Id</dd>
-        </dl>
-        <dl class="row">
-            <dt class="col-sm-2">Service_Id</dt>
-            <dd class="col-sm-10">@appointment.Service_Id</dd>
-        </dl>
-        <dl class="row">
-            <dt class="col-sm-2">Date</dt>
-            <dd class="col-sm-10">@appointment.Date</dd>
-        </dl>
-        <dl class="row">
-            <dt class="col-sm-2">Start</dt>
-            <dd class="col-sm-10">@appointment.Start</dd>
-        </dl>
-        <dl class="row">
-            <dt class="col-sm-2">Status</dt>
-            <dd class="col-sm-10">@appointment.Status</dd>
-        </dl>
-        <dl class="row">
-            <dt class="col-sm-2">Notes</dt>
-            <dd class="col-sm-10">@appointment.Notes</dd>
-        </dl>
-        <dl class="row">
-            <dt class="col-sm-2">Price</dt>
-            <dd class="col-sm-10">@appointment.Price</dd>
-        </dl>
-        <dl class="row">
-            <dt class="col-sm-2">Duration</dt>
-            <dd class="col-sm-10">@appointment.Duration</dd>
-        </dl>
-        <EditForm method="post" Model="appointment" OnValidSubmit="DeleteAppointment" FormName="delete" Enhance>
-            <button type="submit" class="btn btn-danger" disabled="@(appointment is null)">Delete</button> |
-            <a href="/appointments">Back to List</a>
-        </EditForm>
-    }
+            <section>
+                <StatusMessage Message="@ErrorMessage" />
+
+                @if (!string.IsNullOrEmpty(ErrorMessage))
+                {
+                    <div class="text-danger">@ErrorMessage</div>
+                }
+                else if (appointment is null)
+                {
+                    <p><em>Loading...</em></p>
+                }
+                else
+                {
+                    <h2>Appointment</h2>
+                    <hr />
+                    <dl class="row">
+                        <dt class="col-sm-2">Customer</dt>
+                        <dd class="col-sm-10">@appointment.Customer_Id</dd>
+
+                        <dt class="col-sm-2">Employee</dt>
+                        <dd class="col-sm-10">@appointment.Employee_Id</dd>
+
+                        <dt class="col-sm-2">Service</dt>
+                        <dd class="col-sm-10">@appointment.Service_Id</dd>
+
+                        <dt class="col-sm-2">Date</dt>
+                        <dd class="col-sm-10">@appointment.Date.ToString("MMM d, yyyy")</dd>
+
+                        <dt class="col-sm-2">Start</dt>
+                        <dd class="col-sm-10">@appointment.Start.ToString("hh\\:mm tt")</dd>
+
+                        <dt class="col-sm-2">Status</dt>
+                        <dd class="col-sm-10">@appointment.Status</dd>
+
+                        <dt class="col-sm-2">Notes</dt>
+                        <dd class="col-sm-10">@appointment.Notes</dd>
+
+                        <dt class="col-sm-2">Price</dt>
+                        <dd class="col-sm-10">@appointment.Price.ToString("C")</dd>
+
+                        <dt class="col-sm-2">Duration</dt>
+                        <dd class="col-sm-10">@appointment.Duration @("min")</dd>
+                    </dl>
+
+                    <EditForm Model="appointment" OnValidSubmit="DeleteAppointment" FormName="delete" method="post" Enhance>
+                        <div class="mb-2">
+                            <button type="submit" class="w-100 btn btn-lg btn-danger" disabled="@(appointment is null)">Delete</button>
+                        </div>
+                        <div>
+                            <a class="btn btn-sm btn-outline-secondary" href="/appointments">Cancel</a>
+                        </div>
+                    </EditForm>
+                }
+            </section>
+        </div>
+
+        <div class="panel-card" style="flex: 0 0 320px;">
+            <section>
+                <h3>Quick links & help</h3>
+                <hr />
+                <p>
+                    <a class="btn btn-sm btn-secondary mb-2" href="/appointments/create">Create Appointment</a>
+                </p>
+                <p>
+                    <a class="btn btn-sm btn-secondary mb-2" href="/appointments">View Appointments</a>
+                </p>
+                <p>
+                    <a class="btn btn-sm btn-outline-secondary" href="/appointments">Back to List</a>
+                </p>
+            </section>
+        </div>
+    </div>
 </div>
 
 @code {
+    private string? ErrorMessage;
     private Appointment? appointment;
 
     [SupplyParameterFromQuery]
@@ -68,20 +95,46 @@
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-        appointment = await context.Appointment.FirstOrDefaultAsync(m => m.Appointment_Id == Appointment_Id);
+        ErrorMessage = null;
 
-        if (appointment is null)
+        try
         {
-            NavigationManager.NavigateTo("notfound");
+            using var context = DbFactory.CreateDbContext();
+            appointment = await context.Appointment.FirstOrDefaultAsync(m => m.Appointment_Id == Appointment_Id);
+
+            if (appointment is null)
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "An error occurred while loading the appointment.";
+            Console.Error.WriteLine(ex);
         }
     }
 
     private async Task DeleteAppointment()
     {
-        using var context = DbFactory.CreateDbContext();
-        context.Appointment.Remove(appointment!);
-        await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/appointments");
+        ErrorMessage = null;
+
+        if (appointment is null)
+        {
+            ErrorMessage = "Appointment not found.";
+            return;
+        }
+
+        try
+        {
+            using var context = DbFactory.CreateDbContext();
+            context.Appointment.Remove(appointment);
+            await context.SaveChangesAsync();
+            NavigationManager.NavigateTo("/appointments");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "An error occurred while deleting the appointment.";
+            Console.Error.WriteLine(ex);
+        }
     }
 }
