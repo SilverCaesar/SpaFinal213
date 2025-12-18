@@ -18,6 +18,7 @@
             </p>
 
             <QuickGrid Class="table" Items="context.Appointment">
+                <PropertyColumn Property="appointment => appointment.Appointment_Id" />
                 <PropertyColumn Property="appointment => appointment.Customer_Id" />
                 <PropertyColumn Property="appointment => appointment.Employee_Id" />
                 <PropertyColumn Property="appointment => appointment.Service_Id" />

@@ -18,6 +18,7 @@
             </p>
 
             <QuickGrid Class="table" Items="context.Service">
+                <PropertyColumn Property="service => service.Service_Id" />
                 <PropertyColumn Property="service => service.Name" />
                 <PropertyColumn Property="service => service.Description" />
                 <PropertyColumn Property="service => service.Price" />
