@@ -3,34 +3,39 @@
 
 <PageTitle>Services</PageTitle>
 
-<!-- Fixed flip-card layout: scoped styles (no global body changes), corrected CSS, accessible markup -->
+<!-- Flip-card layout scoped to this component. 3 columns x 2 rows on large screens. -->
 <style>
+    .services-page {
+        color: #555;
+        background: #222;
+        text-align: center;
+        font-family: "Roboto Mono", monospace;
+        padding: 1em;
+        margin: 25px;
+    }
 
-    /* Scope styles to this page to avoid global side-effects */
-    .services-page { color: #555; background: #222; text-align: center; font-family: "Roboto Mono", monospace; padding: 1em; margin: 25px; font-size: 25px}
-
-    /* normalize box sizing and base font weight within this component */
     .services-page * { box-sizing: border-box; font-weight: normal; }
 
-    .services-page h1 { font-size: 2.2em; color: #fff; margin: 0; }
-    .services-page h2 { color: #fff; margin: 0 0 0.5rem 0; }
-    .services-page h4 { color: #ddd; margin: 1rem 0 0.5rem; }
+    .services-page h1 { font-size: 1.6rem; color: #fff; margin: 0; }
+    .services-page h2 { color: #fff; margin: 0 0 0.5rem 0; font-size: 0.95rem; }
+    .services-page h4 { color: #ddd; margin: 1rem 0 0.5rem; font-size: 1.25rem; }
 
+    /* Grid layout: 3 columns on large, 2 on medium, 1 on small */
     .flip-container {
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
         gap: 1rem;
-        justify-content: center;
-        align-items: flex-start;
+        justify-items: center;
+        align-items: start;
         margin-top: 1rem;
     }
 
     .flip {
         position: relative;
-        display: inline-block;
-        width: 320px;
+        width: 100%;
+        max-width: 340px; /* keeps cards consistent width */
         perspective: 1000px;
-        margin-bottom: 1em;
+        margin-bottom: 0.5rem;
     }
 
     .flip > .front,
@@ -42,7 +47,7 @@
         background-size: cover !important;
         background-position: center !important;
         height: 220px;
-        padding: 1em 2em;
+        padding: 1em 1rem;
         background: #313131;
         border-radius: 10px;
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
@@ -64,6 +69,7 @@
         transform: rotateY(-180deg);
         backface-visibility: hidden;
         padding: 1.25rem;
+        box-sizing: border-box;
     }
 
     .flip:hover > .front { transform: rotateY(180deg); }
@@ -79,34 +85,11 @@
             1px 1px rgba(0, 0, 0, 0.04),
             2px 2px rgba(0, 0, 0, 0.04),
             3px 3px rgba(0, 0, 0, 0.04),
-            4px 4px rgba(0, 0, 0, 0.04),
-            0.125rem 0.125rem rgba(0, 0, 0, 0.04),
-            6px 6px rgba(0, 0, 0, 0.04),
-            7px 7px rgba(0, 0, 0, 0.04),
-            8px 8px rgba(0, 0, 0, 0.04),
-            9px 9px rgba(0, 0, 0, 0.04),
-            0.3125rem 0.3125rem rgba(0, 0, 0, 0.04),
-            11px 11px rgba(0, 0, 0, 0.04),
-            12px 12px rgba(0, 0, 0, 0.04),
-            13px 13px rgba(0, 0, 0, 0.04),
-            14px 14px rgba(0, 0, 0, 0.04),
-            0.625rem 0.625rem rgba(0, 0, 0, 0.04),
-            16px 16px rgba(0, 0, 0, 0.04),
-            17px 17px rgba(0, 0, 0, 0.04),
-            18px 18px rgba(0, 0, 0, 0.04),
-            19px 19px rgba(0, 0, 0, 0.04),
-            1.25rem 1.25rem rgba(0, 0, 0, 0.04);
+            4px 4px rgba(0, 0, 0, 0.04);
     }
 
-    .credit {
-        display: inline-block;
-        margin-top: 0.75rem;
-        font-size: 8pt;
-        text-decoration: none;
-        color: #bbb;
-    }
-
-   
+    
+    
 </style>
 
 <div class="services-page" role="main" aria-labelledby="services-title">
@@ -139,7 +122,7 @@
             </div>
             <div class="back">
                 <h2>Duration: 90 min — Price: $110</h2>
-                <p>Intense massage targeting the inner layers of your muscles</p>
+                <p>Intense massage targeting the inner layers of your muscles.</p>
             </div>
         </div>
 
@@ -154,25 +137,26 @@
         </div>
 
         <div class="flip flip-vertical" role="listitem" aria-label="Aromatherapy card">
-            <div class="front" style="background-image: url('/images/Aromatherapy.jpg');" aria-hidden="true" ">
+            <div class="front" style="background-image: url('/images/Aromatherapy.jpg');" aria-hidden="true">
                 <h1 class="text-shadow">Aromatherapy</h1>
+            </div>  
+            <div class="back">
+                <h2>Duration: 45 min — Price: $65</h2>
+                <p>Massage using concentrated essential oils to relax and invigorate.</p>
+            </div>
+        </div>
+
+        <div class="flip flip-vertical" role="listitem" aria-label="Mani-Pedi Deluxe card">
+            <div class="front" style="background-image: url('/images/Mani-pedi.jpg');" aria-hidden="true">
+                <h1 class="text-shadow">Mani-Pedi Deluxe</h1>
             </div>
             <div class="back">
-                <h2> Duration: 45 min — Price: $65</h2>
-                <p>Massage using concentrated essential oils to relax and invigorate.</p>
+                <h2>Duration: 60 min — Price: $55</h2>
+                <p>Complete nail care including soaking, exfoliation, and polish.</p>
             </div>
         </div>
     </div>
 
-    <div class="flip flip-vertical" role="listitem" aria-label="Mani-Pedi Deluxe card">
-        <div class="front" style="background-image: url('/images/Mani-pedi.jpg');" aria-hidden="true">
-        </div>
-        <div class="back">
-            <h2>Duration: 45 min — Price: $65</h2>
-            <p>Massage using concentrated essential oils to relax and invigorate.</p>
-        </div>
-    </div>
-   
 </div>
 
 @code {
