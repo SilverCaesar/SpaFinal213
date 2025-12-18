@@ -56,35 +56,30 @@
                 <ValidationMessage For="() => Appointment.Service_Id" class="text-danger" /> 
             </div>        
             <div class="mb-3">
-                <label for="date" class="form-label">Date and time:</label> 
-                <InputDateTimeLocal id="date" @bind-Value="Appointment.Date" class="form-control" @onchange="SyncStartWithDate" /> 
-                <ValidationMessage For="() => Appointment.Date" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="start" class="form-label">Start:</label> 
-                <InputDateTimeLocal id="start" @bind-Value="Appointment.Start" class="form-control" disabled hidden /> 
-                <ValidationMessage For="() => Appointment.Start" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
+                <label class="form-label">Date & Time</label>
+                <InputDate @bind-Value="Appointment.Start" class="form-control" />
+                <ValidationMessage For="() => Appointment.Start" class="text-danger" />
+            </div>
+            <!--<div class="mb-3">
                 <label for="status" class="form-label">Status:</label> 
                 <InputText id="status" @bind-Value="Appointment.Status" class="form-control" /> 
                 <ValidationMessage For="() => Appointment.Status" class="text-danger" /> 
-            </div>        
+            </div>        -->
             <div class="mb-3">
                 <label for="notes" class="form-label">Notes:</label> 
                 <InputText id="notes" @bind-Value="Appointment.Notes" class="form-control" /> 
                 <ValidationMessage For="() => Appointment.Notes" class="text-danger" /> 
             </div>        
-            <div class="mb-3">
+            <!--<div class="mb-3">
                 <label for="price" class="form-label">Price:</label> 
                 <InputNumber id="price" @bind-Value="Appointment.Price" class="form-control" disabled /> 
                 <ValidationMessage For="() => Appointment.Price" class="text-danger" /> 
-            </div>        
+            </div>
             <div class="mb-3">
                 <label for="duration" class="form-label">Duration (minutes):</label> 
                 <InputNumber id="duration" @bind-Value="Appointment.Duration" class="form-control" @onchange="RecalcPrice" /> 
                 <ValidationMessage For="() => Appointment.Duration" class="text-danger" /> 
-            </div>        
+            </div>   -->     
             @if (!string.IsNullOrEmpty(ErrorMessage))
             {
                 <div class="text-danger mb-2">@ErrorMessage</div>
@@ -109,7 +104,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Appointment ??= new Appointment { Date = DateTime.Now, Start = DateTime.Now, Duration = 60 };
+        // ensure Date/Start are non-default so the input shows a value and the model saves correctly
+        Appointment ??= new Appointment { Status = "Scheduled", Duration = 60, Date = DateTime.Now, Start = DateTime.Now };
         using var context = DbFactory.CreateDbContext();
         Customers = await context.Customer.OrderBy(c => c.Fname).ToListAsync();
         Services = await context.Service.OrderBy(s => s.Name).ToListAsync();
@@ -136,12 +132,6 @@
         // price scales proportionally by duration; round to 2 decimals
         var ratio = (decimal)Appointment.Duration / svc.Duration;
         Appointment.Price = Math.Round(svc.Price * ratio, 2);
-    }
-
-    // keep Start in sync with Date when the user changes the Date control
-    private void SyncStartWithDate(ChangeEventArgs _)
-    {
-        Appointment.Start = Appointment.Date;
     }
 
     private async Task AddAppointment()
@@ -174,7 +164,6 @@
             return;
         }
 
-        // employee is optional; if chosen, validate it exists
         if (Appointment.Employee_Id.HasValue)
         {
             var employeeExists = await context.Employee.AnyAsync(e => e.EmployeeId == Appointment.Employee_Id.Value);
@@ -185,11 +174,14 @@
             }
         }
 
-        // ensure Start matches Date before saving
-        Appointment.Start = Appointment.Date;
+        Console.WriteLine($"Debug: Appointment Start before save: {Appointment.Start:o}");
+        Appointment.Date = Appointment.Start;
 
         // ensure the price is current before saving
         CalculatePrice();
+
+        // debug/loggable checkpoint (insert a breakpoint here or log values)
+        // Console.WriteLine($"Saving Appointment - Date: {Appointment.Date:o}, Start: {Appointment.Start:o}");
 
         context.Appointment.Add(Appointment);
         await context.SaveChangesAsync();

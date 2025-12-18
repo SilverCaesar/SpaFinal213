@@ -31,7 +31,7 @@
 
             <div class="mb-3">
                 <label for="createCustomer" class="form-label"> New to our System? </label>
-                <a href="/customers/create" id="createCustomer" class="btn btn-secondary btn-sm ms-2">Create Customer</a>
+                <a href="/clientcustomercreate" id="createCustomer" class="btn btn-secondary btn-sm ms-2">Create Customer</a>
             </div>
 
             <div class="mb-3">
@@ -61,11 +61,11 @@
                 <InputDateTimeLocal id="date" @bind-Value="Appointment.Date" class="form-control" @onchange="SyncStartWithDate" />
                 <ValidationMessage For="() => Appointment.Date" class="text-danger" />
             </div>
-            <div class="mb-3">
+            <!--<div class="mb-3">
                 <label for="start" class="form-label">Start:</label>
                 <InputDateTimeLocal id="start" @bind-Value="Appointment.Start" class="form-control" disabled hidden />
                 <ValidationMessage For="() => Appointment.Start" class="text-danger" />
-            </div>
+            </div>-->
             <div class="mb-3">
                 <label for="status" class="form-label">Status:</label>
                 <InputText id="status" @bind-Value="Appointment.Status" class="form-control" />

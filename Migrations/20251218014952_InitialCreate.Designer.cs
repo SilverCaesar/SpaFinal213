@@ -12,8 +12,8 @@ using SpaFinal213.Data;
 namespace SpaFinal213.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251217235141_FixBooking2")]
-    partial class FixBooking2
+    [Migration("20251218014952_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -252,7 +252,7 @@ namespace SpaFinal213.Migrations
                     b.Property<int?>("Service_Id")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("Start")
+                    b.Property<DateTime>("Start")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Status")
@@ -297,7 +297,8 @@ namespace SpaFinal213.Migrations
                     b.HasKey("Customer_Id");
 
                     b.HasIndex("ApplicationUserId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[ApplicationUserId] IS NOT NULL");
 
                     b.ToTable("Customer");
                 });
@@ -311,7 +312,6 @@ namespace SpaFinal213.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeeId"));
 
                     b.Property<string>("ApplicationUserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("EmployeeType")
@@ -331,7 +331,8 @@ namespace SpaFinal213.Migrations
                     b.HasKey("EmployeeId");
 
                     b.HasIndex("ApplicationUserId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[ApplicationUserId] IS NOT NULL");
 
                     b.HasIndex("SpecializationService_Id");
 
@@ -455,8 +456,7 @@ namespace SpaFinal213.Migrations
                     b.HasOne("SpaFinal213.Data.ApplicationUser", "ApplicationUser")
                         .WithOne("EmployeeProfile")
                         .HasForeignKey("SpaFinal213.Models.Employee", "ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("SpaFinal213.Models.Service", "Specialization")
                         .WithMany()

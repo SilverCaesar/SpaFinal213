@@ -178,7 +178,7 @@ namespace SpaFinal213.Migrations
                 {
                     Customer_Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Fname = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Lname = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -187,12 +187,6 @@ namespace SpaFinal213.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Customer", x => x.Customer_Id);
-                    table.ForeignKey(
-                        name: "FK_Customer_AspNetUsers_ApplicationUserId",
-                        column: x => x.ApplicationUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -201,7 +195,7 @@ namespace SpaFinal213.Migrations
                 {
                     EmployeeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     FName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EmployeeType = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -210,12 +204,6 @@ namespace SpaFinal213.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Employee", x => x.EmployeeId);
-                    table.ForeignKey(
-                        name: "FK_Employee_AspNetUsers_ApplicationUserId",
-                        column: x => x.ApplicationUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_Employee_Service_SpecializationService_Id",
                         column: x => x.SpecializationService_Id,
@@ -247,19 +235,19 @@ namespace SpaFinal213.Migrations
                         column: x => x.Customer_Id,
                         principalTable: "Customer",
                         principalColumn: "Customer_Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Appointment_Employee_Employee_Id",
                         column: x => x.Employee_Id,
                         principalTable: "Employee",
                         principalColumn: "EmployeeId",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Appointment_Service_Service_Id",
                         column: x => x.Service_Id,
                         principalTable: "Service",
                         principalColumn: "Service_Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -320,13 +308,15 @@ namespace SpaFinal213.Migrations
                 name: "IX_Customer_ApplicationUserId",
                 table: "Customer",
                 column: "ApplicationUserId",
-                unique: true);
+                unique: true,
+                filter: "[ApplicationUserId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Employee_ApplicationUserId",
                 table: "Employee",
                 column: "ApplicationUserId",
-                unique: true);
+                unique: true,
+                filter: "[ApplicationUserId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Employee_SpecializationService_Id",

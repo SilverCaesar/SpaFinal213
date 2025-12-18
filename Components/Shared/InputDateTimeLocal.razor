@@ -22,8 +22,9 @@
             return true;
         }
 
-        // HTML datetime-local uses "yyyy-MM-ddTHH:mm"
-        if (DateTime.TryParse(value, out result))
+        // Use exact format that matches the input control and invariant culture to avoid locale issues
+        var formats = new[] { "yyyy-MM-ddTHH:mm", "yyyy-MM-ddTHH:mm:ss" };
+        if (DateTime.TryParseExact(value, formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeLocal, out result))
         {
             validationErrorMessage = null;
             return true;
