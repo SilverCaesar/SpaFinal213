@@ -1,58 +1,84 @@
 ﻿@page "/services/edit"
 @using Microsoft.EntityFrameworkCore
+@using SpaFinal213.Components.Shared
 @using SpaFinal213.Models
 @inject IDbContextFactory<SpaFinal213.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
 <PageTitle>Edit</PageTitle>
 
-<h1>Edit</h1>
+<div class="centered-panel">
+    <div class="panel-inner">
+        <div class="panel-card" style="flex: 1 1 520px;">
+            <h1>Edit</h1>
 
-<h2>Service</h2>
-<hr />
-@if (Service is null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <div class="row">
-        <div class="col-md-4">
-            <EditForm method="post" Model="Service" OnValidSubmit="UpdateService" FormName="edit" Enhance>
-                <DataAnnotationsValidator />
-                <ValidationSummary role="alert"/>
-                <input type="hidden" name="Service.Service_Id" value="@Service.Service_Id" />
-                <div class="mb-3">
-                    <label for="name" class="form-label">Name:</label>
-                    <InputText id="name" @bind-Value="Service.Name" class="form-control" />
-                    <ValidationMessage For="() => Service.Name" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="description" class="form-label">Description:</label>
-                    <InputText id="description" @bind-Value="Service.Description" class="form-control" />
-                    <ValidationMessage For="() => Service.Description" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="price" class="form-label">Price:</label>
-                    <InputNumber id="price" @bind-Value="Service.Price" class="form-control" />
-                    <ValidationMessage For="() => Service.Price" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="duration" class="form-label">Duration:</label>
-                    <InputNumber id="duration" @bind-Value="Service.Duration" class="form-control" />
-                    <ValidationMessage For="() => Service.Duration" class="text-danger" />
-                </div>
-                <button type="submit" class="btn btn-primary">Save</button>
-            </EditForm>
+            <section>
+                <StatusMessage Message="@ErrorMessage" />
+
+                @if (!string.IsNullOrEmpty(ErrorMessage))
+                {
+                    <div class="text-danger">@ErrorMessage</div>
+                }
+                else if (Service is null)
+                {
+                    <p><em>Loading...</em></p>
+                }
+                else
+                {
+                    <EditForm Model="Service" OnValidSubmit="UpdateService" FormName="edit" method="post" Enhance>
+                        <DataAnnotationsValidator />
+                        <h2>Service</h2>
+                        <hr />
+                        <ValidationSummary class="text-danger" role="alert" />
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <InputText id="name" @bind-Value="Service.Name" class="form-control" />
+                            <ValidationMessage For="() => Service.Name" class="text-danger" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <InputText id="description" @bind-Value="Service.Description" class="form-control" />
+                            <ValidationMessage For="() => Service.Description" class="text-danger" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="price" class="form-label">Price</label>
+                                <InputNumber id="price" @bind-Value="Service.Price" class="form-control" />
+                                <ValidationMessage For="() => Service.Price" class="text-danger" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="duration" class="form-label">Duration (minutes)</label>
+                                <InputNumber id="duration" @bind-Value="Service.Duration" class="form-control" />
+                                <ValidationMessage For="() => Service.Duration" class="text-danger" />
+                            </div>
+                        </div>
+
+                        <div class="mt-2">
+                            <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+                        </div>
+                    </EditForm>
+                }
+            </section>
+        </div>
+
+        <div class="panel-card" style="flex: 0 0 320px;">
+            <section>
+                <h3>Quick links & help</h3>
+                <hr />
+                <p><a class="btn btn-sm btn-secondary mb-2" href="/services/create">Create Service</a></p>
+                <p><a class="btn btn-sm btn-secondary mb-2" href="/services">View Services</a></p>
+                <p><a class="btn btn-sm btn-outline-secondary" href="/services">Back to List</a></p>
+            </section>
         </div>
     </div>
-}
-
-<div>
-    <a href="/services">Back to List</a>
 </div>
 
 @code {
+    private string? ErrorMessage;
+
     [SupplyParameterFromQuery]
     private int Service_Id { get; set; }
 
@@ -61,44 +87,63 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-        Service ??= await context.Service.FirstOrDefaultAsync(m => m.Service_Id == Service_Id);
-
-        if (Service is null)
-        {
-            NavigationManager.NavigateTo("notfound");
-        }
-    }
-
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
-    private async Task UpdateService()
-    {
-        using var context = DbFactory.CreateDbContext();
-        context.Attach(Service!).State = EntityState.Modified;
+        ErrorMessage = null;
 
         try
         {
+            using var context = DbFactory.CreateDbContext();
+            Service ??= await context.Service.FirstOrDefaultAsync(s => s.Service_Id == Service_Id);
+
+            if (Service is null)
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "An error occurred while loading the service.";
+            Console.Error.WriteLine(ex);
+        }
+    }
+
+    private async Task UpdateService()
+    {
+        ErrorMessage = null;
+
+        if (Service is null)
+        {
+            ErrorMessage = "Service not found.";
+            return;
+        }
+
+        try
+        {
+            using var context = DbFactory.CreateDbContext();
+            context.Attach(Service).State = EntityState.Modified;
             await context.SaveChangesAsync();
+            NavigationManager.NavigateTo("/services");
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!ServiceExists(Service!.Service_Id))
+            if (!ServiceExists(Service.Service_Id))
             {
                 NavigationManager.NavigateTo("notfound");
             }
             else
             {
-                throw;
+                ErrorMessage = "The record was modified by another user. Please reload and try again.";
             }
         }
-
-        NavigationManager.NavigateTo("/services");
+        catch (Exception ex)
+        {
+            ErrorMessage = "An error occurred while saving the service.";
+            Console.Error.WriteLine(ex);
+        }
     }
 
-    private bool ServiceExists(int service_id)
+    private bool ServiceExists(int id)
     {
         using var context = DbFactory.CreateDbContext();
-        return context.Service.Any(e => e.Service_Id == service_id);
+        return context.Service.Any(e => e.Service_Id == id);
     }
 }

@@ -1,45 +1,71 @@
 ﻿@page "/employees/create"
 @using Microsoft.EntityFrameworkCore
+@using SpaFinal213.Components.Shared
 @using SpaFinal213.Models
 @inject IDbContextFactory<SpaFinal213.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
 <PageTitle>Create</PageTitle>
 
-<h1>Create</h1>
+<div class="centered-panel">
+    <div class="panel-inner">
+        <div class="panel-card" style="flex: 1 1 520px;">
+            <h1>Create</h1>
 
-<h2>Employee</h2>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <EditForm method="post" Model="Employee" OnValidSubmit="AddEmployee" FormName="create" Enhance>
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>   
-            <div class="mb-3">
-                <label for="fname" class="form-label">FName:</label> 
-                <InputText id="fname" @bind-Value="Employee.FName" class="form-control" /> 
-                <ValidationMessage For="() => Employee.FName" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="lname" class="form-label">LName:</label> 
-                <InputText id="lname" @bind-Value="Employee.LName" class="form-control" /> 
-                <ValidationMessage For="() => Employee.LName" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="employeetype" class="form-label">EmployeeType:</label> 
-                <InputText id="employeetype" @bind-Value="Employee.EmployeeType" class="form-control" /> 
-                <ValidationMessage For="() => Employee.EmployeeType" class="text-danger" /> 
-            </div>        
-            <button type="submit" class="btn btn-primary">Create</button>
-        </EditForm>
+            <section>
+                <StatusMessage Message="@ErrorMessage" />
+                <EditForm Model="Employee" method="post" OnValidSubmit="AddEmployee" FormName="create" Enhance>
+                    <DataAnnotationsValidator />
+                    <h2>Employee</h2>
+                    <hr />
+                    <ValidationSummary class="text-danger" role="alert" />
+
+                    <div class="mb-3">
+                        <label for="fname" class="form-label">First name</label>
+                        <InputText id="fname" @bind-Value="Employee.FName" class="form-control" />
+                        <ValidationMessage For="() => Employee.FName" class="text-danger" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="lname" class="form-label">Last name</label>
+                        <InputText id="lname" @bind-Value="Employee.LName" class="form-control" />
+                        <ValidationMessage For="() => Employee.LName" class="text-danger" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="employeetype" class="form-label">Employee type</label>
+                        <InputText id="employeetype" @bind-Value="Employee.EmployeeType" class="form-control" />
+                        <ValidationMessage For="() => Employee.EmployeeType" class="text-danger" />
+                    </div>
+
+                    <div class="mt-2">
+                        <button type="submit" class="w-100 btn btn-lg btn-primary">Create</button>
+                    </div>
+                </EditForm>
+            </section>
+        </div>
+
+        <div class="panel-card" style="flex: 0 0 320px;">
+            <section>
+                <h3>Quick links & help</h3>
+                <hr />
+                <p>
+                    <a class="btn btn-sm btn-secondary mb-2" href="/employees">View Employees</a>
+                </p>
+                <p>
+                    <a class="btn btn-sm btn-secondary mb-2" href="/appointments/create">Create Appointment</a>
+                </p>
+                <p>
+                    <a class="btn btn-sm btn-outline-secondary" href="/employees">Back to List</a>
+                </p>
+            </section>
+        </div>
     </div>
 </div>
 
-<div>
-    <a href="/employees">Back to List</a>
-</div>
-
 @code {
+    private string? ErrorMessage;
+
     [SupplyParameterFromForm]
     private Employee Employee { get; set; } = default!;
 
@@ -48,9 +74,19 @@
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddEmployee()
     {
-        using var context = DbFactory.CreateDbContext();
-        context.Employee.Add(Employee);
-        await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/employees");
+        ErrorMessage = null;
+
+        try
+        {
+            using var context = DbFactory.CreateDbContext();
+            context.Employee.Add(Employee);
+            await context.SaveChangesAsync();
+            NavigationManager.NavigateTo("/employees");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "An error occurred while creating the employee.";
+            Console.Error.WriteLine(ex);
+        }
     }
 }
