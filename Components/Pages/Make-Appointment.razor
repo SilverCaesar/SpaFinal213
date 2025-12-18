@@ -7,90 +7,121 @@
 
 <PageTitle>Create</PageTitle>
 
-<h1>Create</h1>
+<div class="centered-panel">
+    <div class="panel-inner">
+        <div class="panel-card" style="flex: 1 1 520px;">
+            <h1>Create</h1>
+            <section>
+                <h2>Appointment</h2>
+                <hr />
+                <EditForm method="post" Model="Appointment" OnValidSubmit="AddAppointment" FormName="create" Enhance>
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger" role="alert" />
 
-<h2>Appointment</h2>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <EditForm method="post" Model="Appointment" OnValidSubmit="AddAppointment" FormName="create" Enhance>
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="mb-3">
-                <label for="customer_id" class="form-label">Customer:</label>
-                <InputSelect id="customer_id" @bind-Value="Appointment.Customer_Id" class="form-control">
-                    <option value="">-- Select customer --</option>
-                    @foreach (var c in Customers)
-                    {
-                        <option value="@c.Customer_Id">@($"{c.Fname} {c.Lname}")</option>
-                    }
-                </InputSelect>
-                <ValidationMessage For="() => Appointment.Customer_Id" class="text-danger" />
-            </div>
+                    <div class="form-floating mb-3">
+                        <InputSelect id="customer_id" @bind-Value="Appointment.Customer_Id" class="form-select">
+                            <option value="">-- Select customer --</option>
+                            @foreach (var c in Customers)
+                            {
+                                <option value="@c.Customer_Id">@($"{c.Fname} {c.Lname}")</option>
+                            }
+                        </InputSelect>
+                        <label for="customer_id">Customer</label>
+                        <ValidationMessage For="() => Appointment.Customer_Id" class="text-danger" />
+                    </div>
 
-            <div class="mb-3">
-                <label for="createCustomer" class="form-label"> New to our System? </label>
-                <a href="/clientcustomercreate" id="createCustomer" class="btn btn-secondary btn-sm ms-2">Create Customer</a>
-            </div>
+                    <div class="mb-3">
+                        <label class="form-label">New to our System?</label>
+                        <a href="/clientcustomercreate" id="createCustomer" class="btn btn-secondary btn-sm ms-2">Create Customer</a>
+                    </div>
 
-            <div class="mb-3">
-                <label for="employee_id" class="form-label">Employee:</label>
-                <InputSelect id="employee_id" @bind-Value="Appointment.Employee_Id" class="form-control">
-                    <option value="">-- Select employee --</option>
-                    @foreach (var e in Employees)
+                    <div class="form-floating mb-3">
+                        <InputSelect id="employee_id" @bind-Value="Appointment.Employee_Id" class="form-select">
+                            <option value="">-- Select employee --</option>
+                            @foreach (var e in Employees)
+                            {
+                                <option value="@e.EmployeeId">@($"{e.FName} {e.LName}")</option>
+                            }
+                        </InputSelect>
+                        <label for="employee_id">Employee</label>
+                        <ValidationMessage For="() => Appointment.Employee_Id" class="text-danger" />
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <InputSelect id="service_id" @bind-Value="Appointment.Service_Id" class="form-select" @onchange="RecalcPrice">
+                            <option value="">-- Select service --</option>
+                            @foreach (var s in Services)
+                            {
+                                <option value="@s.Service_Id">@($"{s.Name} ({s.Duration}m) - {s.Price:C}")</option>
+                            }
+                        </InputSelect>
+                        <label for="service_id">Service</label>
+                        <ValidationMessage For="() => Appointment.Service_Id" class="text-danger" />
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <InputDate Type="InputDateType.DateTimeLocal" id="date" @bind-Value="Appointment.Date" class="form-control" />
+                        <label for="date">Date</label>
+                        <ValidationMessage For="() => Appointment.Date" class="text-danger" />
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <InputDate Type="InputDateType.DateTimeLocal" id="start" @bind-value="Appointment.Start" class="form-control" disabled />
+                        <label for="start">Start</label>
+                        <ValidationMessage For="() => Appointment.Start" class="text-danger" />
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <InputText id="status" @bind-Value="Appointment.Status" class="form-control" disabled />
+                        <label for="status">Status</label>
+                        <ValidationMessage For="() => Appointment.Status" class="text-danger" />
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <InputText id="notes" @bind-Value="Appointment.Notes" class="form-control" />
+                        <label for="notes">Notes</label>
+                        <ValidationMessage For="() => Appointment.Notes" class="text-danger" />
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <InputNumber id="price" @bind-Value="Appointment.Price" class="form-control" disabled />
+                        <label for="price">Price</label>
+                        <ValidationMessage For="() => Appointment.Price" class="text-danger" />
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <InputNumber id="duration" @bind-Value="Appointment.Duration" class="form-control" @onchange="RecalcPrice" disabled />
+                        <label for="duration">Duration (minutes)</label>
+                        <ValidationMessage For="() => Appointment.Duration" class="text-danger" />
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(ErrorMessage))
                     {
-                        <option value="@e.EmployeeId">@($"{e.FName} {e.LName}")</option>
+                        <div class="text-danger mb-2">@ErrorMessage</div>
                     }
-                </InputSelect>
-                <ValidationMessage For="() => Appointment.Employee_Id" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="service_id" class="form-label">Service:</label>
-                <InputSelect id="service_id" @bind-Value="Appointment.Service_Id" class="form-control" @onchange="RecalcPrice">
-                    <option value="">-- Select service --</option>
-                    @foreach (var s in Services)
-                    {
-                        <option value="@s.Service_Id">@($"{s.Name} ({s.Duration}m) - {s.Price:C}")</option>
-                    }
-                </InputSelect>
-                <ValidationMessage For="() => Appointment.Service_Id" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="date" class="form-label">Date:</label>
-                <InputDate Type="InputDateType.DateTimeLocal" id="date" @bind-Value="Appointment.Date" class="form-control" />
-                <ValidationMessage For="() => Appointment.Date" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="start" class="form-label">Start:</label>
-                <InputDate Type="InputDateType.DateTimeLocal" id="start" @bind-value="Appointment.Start" class="form-control" disabled />
-                <ValidationMessage For="() => Appointment.Start" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="status" class="form-label">Status:</label>
-                <InputText id="status" @bind-Value="Appointment.Status" class="form-control" disabled/>
-                <ValidationMessage For="() => Appointment.Status" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="notes" class="form-label">Notes:</label>
-                <InputText id="notes" @bind-Value="Appointment.Notes" class="form-control" />
-                <ValidationMessage For="() => Appointment.Notes" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="price" class="form-label">Price:</label>
-                <InputNumber id="price" @bind-Value="Appointment.Price" class="form-control" disabled />
-                <ValidationMessage For="() => Appointment.Price" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="duration" class="form-label">Duration (minutes):</label>
-                <InputNumber id="duration" @bind-Value="Appointment.Duration" class="form-control" @onchange="RecalcPrice" disabled/>
-                <ValidationMessage For="() => Appointment.Duration" class="text-danger" />
-            </div>
-            @if (!string.IsNullOrEmpty(ErrorMessage))
-            {
-                <div class="text-danger mb-2">@ErrorMessage</div>
-            }
-            <button type="submit" class="btn btn-primary">Create</button>
-        </EditForm>
+
+                    <div>
+                        <button type="submit" class="w-100 btn btn-lg btn-primary">Create</button>
+                    </div>
+                </EditForm>
+            </section>
+        </div>
+
+        <div class="panel-card" style="flex: 0 0 320px;">
+            <section>
+                <h3>Summary & Tips</h3>
+                <hr />
+                <p><strong>Selected Service:</strong> @(Services.FirstOrDefault(s => s.Service_Id == Appointment.Service_Id)?.Name ?? "—")</p>
+                <p><strong>Duration:</strong> @Appointment.Duration m</p>
+                <p><strong>Price:</strong> @Appointment.Price:C</p>
+
+                <p>If you need to add a new customer first, use the Create Customer button on the form.</p>
+
+                <p class="mt-3">
+                    <a class="btn btn-outline-secondary w-100" href="/appointments">Back to appointments</a>
+                </p>
+            </section>
+        </div>
     </div>
 </div>
 
