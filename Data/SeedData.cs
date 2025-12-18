@@ -80,23 +80,51 @@ namespace SpaFinal213.Data
                 );
             }
 
-            // Seed services
+            // Seed services (match entries shown in Components/Pages/Services.razor)
             if (!context.Service.Any())
             {
                 context.Service.AddRange(
                     new Service
                     {
-                        Name = "Swedish Massage",
-                        Description = "A relaxing full-body massage.",
+                        Name = "Massage Therapy",
+                        Description = "Relaxing full-body massage to relieve stress and tension.",
                         Duration = 60,
                         Price = 80.00M
                     },
                     new Service
                     {
-                        Name = "Deep Tissue Massage",
-                        Description = "A therapeutic massage targeting deeper layers of muscle.",
+                        Name = "Signature Facial",
+                        Description = "Rejuvenating facial treatment with cleansing, exfoliation, and mask.",
                         Duration = 60,
-                        Price = 90.00M
+                        Price = 70.00M
+                    },
+                    new Service
+                    {
+                        Name = "Deep Tissue Massage",
+                        Description = "Intense massage targeting the inner layers of your muscles.",
+                        Duration = 90,
+                        Price = 110.00M
+                    },
+                    new Service
+                    {
+                        Name = "Hot Stone Therapy",
+                        Description = "Smooth heated stones placed on specific parts of the body.",
+                        Duration = 75,
+                        Price = 130.00M
+                    },
+                    new Service
+                    {
+                        Name = "Aromatherapy",
+                        Description = "Massage using concentrated essential oils to relax and invigorate.",
+                        Duration = 45,
+                        Price = 65.00M
+                    },
+                    new Service
+                    {
+                        Name = "Mani-Pedi Deluxe",
+                        Description = "Complete nail care including soaking, exfoliation, and polish.",
+                        Duration = 60,
+                        Price = 55.00M
                     }
                 );
             }

@@ -4,6 +4,7 @@
 @using SpaFinal213.Models
 @inject IDbContextFactory<SpaFinal213.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
+@inject ILoggerFactory LoggerFactory
 
 <PageTitle>Create</PageTitle>
 
@@ -48,7 +49,8 @@
                     </div>
 
                     <div class="form-floating mb-3">
-                        <InputSelect id="service_id" @bind-Value="Appointment.Service_Id" class="form-select" @onchange="RecalcPrice">
+                        <!-- bind to a local property so setter runs reliably when selection changes -->
+                        <InputSelect id="service_id" @bind-Value="SelectedServiceId" class="form-select">
                             <option value="">-- Select service --</option>
                             @foreach (var s in Services)
                             {
@@ -90,7 +92,7 @@
                     </div>
 
                     <div class="form-floating mb-3">
-                        <InputNumber id="duration" @bind-Value="Appointment.Duration" class="form-control" @onchange="RecalcPrice" disabled />
+                        <InputNumber id="duration" @bind-Value="Appointment.Duration" class="form-control" disabled />
                         <label for="duration">Duration (minutes)</label>
                         <ValidationMessage For="() => Appointment.Duration" class="text-danger" />
                     </div>
@@ -125,50 +127,128 @@
     </div>
 </div>
 
+@if (Services?.Any() == true)
+{
+    <pre>@System.Text.Json.JsonSerializer.Serialize(Services, new System.Text.Json.JsonSerializerOptions { WriteIndented = true })</pre>
+}
+
 @code {
     private List<Customer> Customers { get; set; } = new();
     private List<Service> Services { get; set; } = new();
     private List<Employee> Employees { get; set; } = new();
     private string? ErrorMessage;
+    private ILogger? _logger;
 
     [SupplyParameterFromForm]
     private Appointment Appointment { get; set; } = default!;
 
-    protected override async Task OnInitializedAsync()
+    // Local property used for binding so setter runs after selection changes.
+    private int? SelectedServiceId
     {
-        Appointment ??= new Appointment { Date = DateTime.Now.Date, Start = TimeOnly.FromDateTime(DateTime.Now), Duration = 60, Status = "Scheduled"};
-        using var context = DbFactory.CreateDbContext();
-        Customers = await context.Customer.OrderBy(c => c.Fname).ToListAsync();
-        Services = await context.Service.OrderBy(s => s.Name).ToListAsync();
-        Employees = await context.Employee.OrderBy(e => e.FName).ToListAsync();
-        // ensure AppointmentTime string reflects current Start
-        // (getter will produce correct formatted string)
-        CalculatePrice();
+        get => Appointment.Service_Id;
+        set
+        {
+            _logger?.LogDebug("SelectedServiceId setter: incoming value={Value}", value);
+            Appointment.Service_Id = value;
+
+            if (value is null)
+            {
+                Appointment.Duration = 0;
+                Appointment.Price = 0m;
+                StateHasChanged();
+                _logger?.LogDebug("SelectedServiceId setter: cleared selection");
+                return;
+            }
+
+            var svc = Services.FirstOrDefault(s => s.Service_Id == value.Value);
+            if (svc is not null)
+            {
+                Appointment.Duration = svc.Duration;
+                CalculatePrice();
+                _logger?.LogInformation("Selected service: Id={Id} Name={Name} Price={Price} Duration={Duration} -> Appointment.Price={ApptPrice}",
+                    svc.Service_Id, svc.Name, svc.Price, svc.Duration, Appointment.Price);
+            }
+            else
+            {
+                _logger?.LogWarning("SelectedServiceId setter: service {Id} not found in Services list", value);
+                Appointment.Duration = 0;
+                Appointment.Price = 0m;
+            }
+
+            StateHasChanged();
+        }
     }
 
-    private void RecalcPrice(ChangeEventArgs _)
+    protected override async Task OnInitializedAsync()
     {
+        _logger = LoggerFactory.CreateLogger("Make-Appointment");
+        Appointment ??= new Appointment { Date = DateTime.Now.Date, Start = TimeOnly.FromDateTime(DateTime.Now), Duration = 60, Status = "Scheduled" };
+
+        try
+        {
+            using var context = DbFactory.CreateDbContext();
+            Customers = await context.Customer.OrderBy(c => c.Fname).ToListAsync();
+            Services = await context.Service.OrderBy(s => s.Name).ToListAsync();
+            Employees = await context.Employee.OrderBy(e => e.FName).ToListAsync();
+
+            _logger?.LogInformation("OnInitializedAsync: loaded Customers={Count}, Services={Count}, Employees={Count}",
+                Customers.Count, Services.Count, Employees.Count);
+
+            foreach (var s in Services)
+            {
+                _logger?.LogInformation("Service row: Id={Id} Name={Name} Price={Price} Duration={Duration}",
+                    s.Service_Id, s.Name ?? "<null>", s.Price, s.Duration);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "OnInitializedAsync: failed loading data from DB");
+            throw;
+        }
+
+        // initialize price for default selection (if any)
         CalculatePrice();
     }
 
     private void CalculatePrice()
     {
+        _logger?.LogDebug("CalculatePrice: Appointment.Service_Id={ServiceId}, Appointment.Duration={Duration}, Appointment.Price(before)={Price}",
+            Appointment.Service_Id, Appointment.Duration, Appointment.Price);
+
         Appointment.Price = 0m;
 
         if (!Appointment.Service_Id.HasValue)
+        {
+            _logger?.LogDebug("CalculatePrice: no Service_Id selected");
             return;
+        }
 
         var svc = Services.FirstOrDefault(s => s.Service_Id == Appointment.Service_Id.Value);
-        if (svc == null || svc.Duration <= 0)
+        if (svc == null)
+        {
+            _logger?.LogWarning("CalculatePrice: service not found for id {Id}", Appointment.Service_Id.Value);
             return;
+        }
 
-        // price scales proportionally by duration; round to 2 decimals
+        if (svc.Duration <= 0)
+        {
+            _logger?.LogWarning("CalculatePrice: service {Id} has non-positive Duration={Duration}", svc.Service_Id, svc.Duration);
+            return;
+        }
+
         var ratio = (decimal)Appointment.Duration / svc.Duration;
-        Appointment.Price = Math.Round(svc.Price * ratio, 2);
+        var computed = Math.Round(svc.Price * ratio, 2);
+        Appointment.Price = computed;
+
+        _logger?.LogInformation("CalculatePrice: svc.Id={Id} svc.Price={SvcPrice} svc.Duration={SvcDuration} ratio={Ratio} computedPrice={Computed}",
+            svc.Service_Id, svc.Price, svc.Duration, ratio, computed);
     }
 
     private async Task AddAppointment()
     {
+        _logger?.LogDebug("AddAppointment: starting. Appointment.Service_Id={ServiceId} Duration={Duration} Price(before)={Price}",
+            Appointment.Service_Id, Appointment.Duration, Appointment.Price);
+
         ErrorMessage = null;
 
         using var context = DbFactory.CreateDbContext();
@@ -208,8 +288,10 @@
             }
         }
 
-        // no merging: Date remains DateTime (date portion), Start remains TimeOnly (time portion)
+        // ensure price is correct before save
         CalculatePrice();
+        _logger?.LogInformation("AddAppointment: ready to save. Appointment.Service_Id={ServiceId} Duration={Duration} Price(final)={Price}",
+            Appointment.Service_Id, Appointment.Duration, Appointment.Price);
 
         context.Appointment.Add(Appointment);
         await context.SaveChangesAsync();
