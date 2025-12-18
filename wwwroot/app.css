@@ -175,7 +175,7 @@ h1:focus { outline: none; }
 /* ===== Panel styles: centered dark translucent backing + white cards ===== */
 .centered-panel {
     position: relative;
-    max-width: 1100px;
+    max-width: 1400px;
     width: calc(100% - 48px);
     margin: 2rem auto;
     padding: 1.25rem;
@@ -212,13 +212,14 @@ h1:focus { outline: none; }
     border-radius: 10px;
     box-shadow: 0 6px 18px rgba(0,0,0,0.18);
     color: #222;
-    min-width: 300px;
+    min-width: 420px;
     flex: 1 1 360px;
 }
 
-/* full width card variant */
 .panel-card.full {
-    flex: 1 1 100%;
+    flex: 1 1 75%;
+    padding: 1.5rem;
+    min-width: 700px;
 }
 
 /* Review page styles (appended) */
