@@ -16,8 +16,10 @@
 
     .services-page * { box-sizing: border-box; font-weight: normal; }
 
-    .services-page h1 { font-size: 1.6rem; color: #fff; margin: 0; }
-    .services-page h2 { color: #fff; margin: 0 0 0.5rem 0; font-size: 0.95rem; }
+    /* larger, more readable headings on cards */
+    .services-page h1 { font-size: 2.1rem; color: #fff; margin: 0; }
+    .services-page h2 { color: #fff; margin: 0 0 0.5rem 0; font-size: 1.15rem; }
+    .services-page p { font-size: 1rem; line-height: 1.5; color: #e6e6e6; }
     .services-page h4 { color: #ddd; margin: 1rem 0 0.5rem; font-size: 1.25rem; }
 
     /* Grid layout: 3 columns on large, 2 on medium, 1 on small */
@@ -33,7 +35,7 @@
     .flip {
         position: relative;
         width: 100%;
-        max-width: 340px; /* keeps cards consistent width */
+        max-width: 380px; /* slightly wider cards for larger text */
         perspective: 1000px;
         margin-bottom: 0.5rem;
     }
@@ -46,8 +48,8 @@
         color: white;
         background-size: cover !important;
         background-position: center !important;
-        height: 220px;
-        padding: 1em 1rem;
+        height: 340px; /* increased height for a bigger textbox feel */
+        padding: 1.5rem 1.25rem; /* increased padding */
         background: #313131;
         border-radius: 10px;
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
@@ -56,9 +58,10 @@
         justify-content: center;
         align-items: center;
         text-align: center;
+        overflow: hidden;
     }
 
-    .flip > .front { transform: rotateY(0deg); backface-visibility: hidden; }
+    /* make back content scrollable if it overflows */
     .flip > .back {
         position: absolute;
         opacity: 0;
@@ -68,9 +71,12 @@
         height: 100%;
         transform: rotateY(-180deg);
         backface-visibility: hidden;
-        padding: 1.25rem;
+        padding: 1.5rem;
         box-sizing: border-box;
     }
+
+    .back h2 { margin-bottom: 0.5rem; }
+    .back p { margin: 0; }
 
     .flip:hover > .front { transform: rotateY(180deg); }
     .flip:hover > .back { opacity: 1; transform: rotateY(0deg); }
@@ -88,8 +94,7 @@
             4px 4px rgba(0, 0, 0, 0.04);
     }
 
-    
-    
+   
 </style>
 
 <div class="services-page" role="main" aria-labelledby="services-title">
@@ -116,7 +121,7 @@
             </div>
         </div>
 
-        <div class="flip" role="listitem" aria-label="Deep Tissue Massage card">
+        <div class="flip" role="listitem" aria-label="Deep Tissue Massage card">        
             <div class="front" style="background-image: url('/images/Deep Tissue Massage.webp');" aria-hidden="true">
                 <h1 class="text-shadow">Deep Tissue Massage</h1>
             </div>
@@ -139,7 +144,7 @@
         <div class="flip flip-vertical" role="listitem" aria-label="Aromatherapy card">
             <div class="front" style="background-image: url('/images/Aromatherapy.jpg');" aria-hidden="true">
                 <h1 class="text-shadow">Aromatherapy</h1>
-            </div>  
+            </div>
             <div class="back">
                 <h2>Duration: 45 min — Price: $65</h2>
                 <p>Massage using concentrated essential oils to relax and invigorate.</p>
