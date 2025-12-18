@@ -1,135 +1,207 @@
 ﻿@page "/bookappointment"
-@using SpaFinal213.Models
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
 @using SpaFinal213.Data
-@using System
+@using SpaFinal213.Models
 @inject ApplicationDbContext Db
 @inject NavigationManager Navigation
-@using Microsoft.EntityFrameworkCore
-@using Microsoft.AspNetCore.Components.Forms
+@inject AuthenticationStateProvider AuthStateProvider
+@inject UserManager<ApplicationUser> UserManager
 
 <h3>Book New Appointment</h3>
 
-<hr />
+@if (!string.IsNullOrEmpty(Notification))
+{
+    <div class="alert alert-info">@Notification</div>
+}
 
-<EditForm Model="@newCustomer" OnValidSubmit="CreateAppointment" FormName="MakeAppointment">
+<EditForm Model="Form" OnValidSubmit="HandleValidSubmit" FormName="MakeAppointmentForm">
     <DataAnnotationsValidator />
-    <ValidationSummary />
+    <ValidationSummary class="text-danger" />
 
-    <h4>Step 1: New Customer</h4>
+    <h4>Contact</h4>
     <div class="mb-3">
-        <label class="form-label">First Name</label>
-        <InputText class="form-control" @bind-Value="newCustomer.Fname" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Last Name</label>
-        <InputText class="form-control" @bind-Value="newCustomer.Lname" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Notes</label>
-        <InputTextArea class="form-control" @bind-Value="newCustomer.Notes" />
+        <label class="form-label">First name</label>
+        <InputText class="form-control" @bind-Value="Form.FirstName" />
+        <ValidationMessage For="() => Form.FirstName" class="text-danger" />
     </div>
 
-    <h4>Step 2: Appointment Details</h4>
     <div class="mb-3">
-        <label class="form-label">Employee</label>
-        <InputSelect class="form-control" @bind-Value="selectedEmployeeId" TValue="int?">
-            <option value="">-- Select Employee --</option>
-            @foreach (var emp in employees)
-            {
-                <option value="@emp.EmployeeId">@emp.FName @emp.LName</option>
-            }
-        </InputSelect>
+        <label class="form-label">Last name</label>
+        <InputText class="form-control" @bind-Value="Form.LastName" />
+        <ValidationMessage For="() => Form.LastName" class="text-danger" />
     </div>
 
+    <h4>Appointment</h4>
     <div class="mb-3">
         <label class="form-label">Service</label>
-        <InputSelect class="form-control" @bind-Value="selectedServiceId" TValue="int?">
-            <option value="">-- Select Service --</option>
-            @foreach (var srv in services)
+        <InputSelect class="form-control" @bind-Value="Form.ServiceId" TValue="int?">
+            <option value="">-- Select service --</option>
+            @foreach (var s in Services)
             {
-                <option value="@srv.Service_Id">@srv.Name (@srv.Duration mins, @srv.Price:C)</option>
+                <option value="@s.Service_Id">@($"{s.Name} — {s.Duration} min — {s.Price:C}")</option>
             }
         </InputSelect>
+        <ValidationMessage For="() => Form.ServiceId" class="text-danger" />
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Appointment Date & Time</label>
-        <InputDate class="form-control" @bind-Value="appointmentDate" />
-        <input type="time" class="form-control mt-1" @bind="appointmentTime" @bind:format="HH:mm" />
+        <label class="form-label">Employee</label>
+        <InputSelect class="form-control" @bind-Value="Form.EmployeeId" TValue="int?">
+            <option value="">-- Select employee --</option>
+            @foreach (var e in Employees)
+            {
+                <option value="@e.EmployeeId">@($"{e.FName} {e.LName}")</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => Form.EmployeeId" class="text-danger" />
+    </div>
+
+    <div class="row g-2 mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Date</label>
+            <InputDate class="form-control" @bind-Value="Form.Date" />
+            <ValidationMessage For="() => Form.Date" class="text-danger" />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Time</label>
+            <input type="time" class="form-control" @bind="Form.Time" @bind:format="HH:mm" />
+            <ValidationMessage For="() => Form.Time" class="text-danger" />
+        </div>
     </div>
 
     <div class="mb-3">
         <label class="form-label">Notes</label>
-        <InputTextArea class="form-control" @bind-Value="appointmentNotes" />
+        <InputTextArea class="form-control" @bind-Value="Form.Notes" />
     </div>
 
     <button type="submit" class="btn btn-primary">Create Appointment</button>
 </EditForm>
 
 @code {
-    private Customer newCustomer = new Customer
+    private string? Notification;
+
+    private List<Service> Services { get; set; } = new();
+    private List<Employee> Employees { get; set; } = new();
+
+    private AppointmentFormModel Form { get; set; } = new()
     {
-        DateAccount = DateTime.Now
+        Date = DateTime.Today,
+        Time = TimeOnly.FromTimeSpan(TimeSpan.FromHours(9))
     };
-
-    private List<Employee> employees = new();
-    private List<Service> services = new();
-
-    private int? selectedEmployeeId;
-    private int? selectedServiceId;
-
-    private DateTime appointmentDate = DateTime.Today;
-    // Use TimeOnly for binding to <input type="time">
-    private TimeOnly appointmentTime = TimeOnly.FromTimeSpan(TimeSpan.Zero);
-
-    private string? appointmentNotes;
 
     protected override async Task OnInitializedAsync()
     {
-        employees = await Db.Employee.ToListAsync();
-        services = await Db.Service.ToListAsync();
+        Services = await Db.Service.OrderBy(s => s.Name).ToListAsync();
+        Employees = await Db.Employee.OrderBy(e => e.FName).ThenBy(e => e.LName).ToListAsync();
     }
 
-    private async Task CreateAppointment()
+    private async Task HandleValidSubmit()
     {
-        if (selectedEmployeeId == null || selectedServiceId == null)
+        Notification = null;
+
+        // Basic server-side validation
+        if (!Form.ServiceId.HasValue || !Form.EmployeeId.HasValue)
         {
-            // Add proper validation/error handling (could show a message)
+            Notification = "Please select both a service and an employee.";
             return;
         }
 
-        // Save new Customer
-        Db.Customer.Add(newCustomer);
-        await Db.SaveChangesAsync();
+        // Resolve service and employee from DB
+        var service = await Db.Service.FindAsync(Form.ServiceId.Value);
+        var employee = await Db.Employee.FindAsync(Form.EmployeeId.Value);
 
-        // Get selected Employee and Service
-        var employee = await Db.Employee.FindAsync(selectedEmployeeId);
-        var service = await Db.Service.FindAsync(selectedServiceId);
-
-        if (employee == null || service == null)
+        if (service is null || employee is null)
+        {
+            Notification = "Selected service or employee no longer exists.";
             return;
+        }
 
-        // When creating the Appointment
-        var appointmentStart = appointmentDate.Date + appointmentTime.ToTimeSpan();
+        // Create or find customer
+        Customer customer = new()
+        {
+            Fname = Form.FirstName?.Trim() ?? string.Empty,
+            Lname = Form.LastName?.Trim() ?? string.Empty,
+            Notes = null,
+            DateAccount = DateTime.UtcNow
+        };
 
-        // Create Appointment
+        try
+        {
+            // try to link to authenticated user if present
+            var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = auth.User;
+            if (user.Identity?.IsAuthenticated == true)
+            {
+                var appUser = await UserManager.GetUserAsync(user);
+                if (appUser != null)
+                {
+                    customer.ApplicationUserId = appUser.Id;
+                }
+            }
+
+            Db.Customer.Add(customer);
+            await Db.SaveChangesAsync();
+        }
+        catch (DbUpdateException dbEx)
+        {
+            Notification = "Failed to save customer: " + dbEx.GetBaseException().Message;
+            return;
+        }
+
+        // Compose appointment start time
+        var start = Form.Date.Date + (Form.Time?.ToTimeSpan() ?? TimeSpan.Zero);
+
         var appointment = new Appointment
         {
-            Customer_Id = newCustomer.Customer_Id,
+            Customer_Id = customer.Customer_Id,
             Employee_Id = employee.EmployeeId,
             Service_Id = service.Service_Id,
-            Date = appointmentStart,
-            Start = null,
+            Date = Form.Date.Date,
+            Start = start,
             Duration = service.Duration,
             Price = service.Price,
-            Notes = appointmentNotes,
+            Notes = Form.Notes,
             Status = "Scheduled"
         };
 
-        Db.Appointment.Add(appointment);
-        await Db.SaveChangesAsync();
+        try
+        {
+            Db.Appointment.Add(appointment);
+            await Db.SaveChangesAsync();
+        }
+        catch (DbUpdateException dbEx)
+        {
+            Notification = "Failed to save appointment: " + dbEx.GetBaseException().Message;
+            return;
+        }
 
-        // Navigate or show success
+        Notification = "Appointment created.";
         Navigation.NavigateTo("/appointments");
+    }
+
+    private class AppointmentFormModel
+    {
+        [Required]
+        public string? FirstName { get; set; }
+
+        [Required]
+        public string? LastName { get; set; }
+
+        [Required]
+        public int? ServiceId { get; set; }
+
+        [Required]
+        public int? EmployeeId { get; set; }
+
+        [Required]
+        public DateTime Date { get; set; }
+
+        [Required]
+        public TimeOnly? Time { get; set; }
+
+        public string? Notes { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SpaFinal213.Data;
 
@@ -11,9 +12,11 @@ using SpaFinal213.Data;
 namespace SpaFinal213.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251217235508_Pending1")]
+    partial class Pending1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -309,6 +312,7 @@ namespace SpaFinal213.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeeId"));
 
                     b.Property<string>("ApplicationUserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("EmployeeType")
@@ -328,8 +332,7 @@ namespace SpaFinal213.Migrations
                     b.HasKey("EmployeeId");
 
                     b.HasIndex("ApplicationUserId")
-                        .IsUnique()
-                        .HasFilter("[ApplicationUserId] IS NOT NULL");
+                        .IsUnique();
 
                     b.HasIndex("SpecializationService_Id");
 
@@ -453,7 +456,8 @@ namespace SpaFinal213.Migrations
                     b.HasOne("SpaFinal213.Data.ApplicationUser", "ApplicationUser")
                         .WithOne("EmployeeProfile")
                         .HasForeignKey("SpaFinal213.Models.Employee", "ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("SpaFinal213.Models.Service", "Specialization")
                         .WithMany()

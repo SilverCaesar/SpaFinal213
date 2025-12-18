@@ -10,8 +10,7 @@ namespace SpaFinal213.Models
         [Key]
         public int EmployeeId { get; set; }
 
-        // FK to Identity user (AspNetUsers.Id is string)
-        [Required]
+        // FK to Identity user (AspNetUsers.Id is string
         public string? ApplicationUserId { get; set; }
 
         [ForeignKey(nameof(ApplicationUserId))]
