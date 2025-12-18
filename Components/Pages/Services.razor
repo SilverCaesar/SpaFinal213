@@ -7,7 +7,7 @@
 <style>
 
     /* Scope styles to this page to avoid global side-effects */
-    .services-page { color: #555; background: #222; text-align: center; font-family: "Roboto Mono", monospace; padding: 1em; margin: 25px}
+    .services-page { color: #555; background: #222; text-align: center; font-family: "Roboto Mono", monospace; padding: 1em; margin: 25px; font-size: 25px}
 
     /* normalize box sizing and base font weight within this component */
     .services-page * { box-sizing: border-box; font-weight: normal; }
@@ -114,46 +114,64 @@
 
     <div class="flip-container" role="list" aria-label="Service cards">
         <div class="flip" role="listitem" aria-label="Massage Therapy card">
-            <div class="front" style="background-image: url('/images/SpaImage.png');" aria-hidden="true">
-                <h1 class="text-shadow">MOUNTAIN</h1>
+            <div class="front" style="background-image: url('/images/Massage Therapy.jpg');" aria-hidden="true">
+                <h1 class="text-shadow">Massage Therapy</h1>
             </div>
             <div class="back">
-                <h2>Massage Therapy</h2>
-                <p>Relaxing full-body massage to relieve stress and tension. Duration: 60 min — Price: $80</p>
+                <h2>Duration: 60 min — Price: $80</h2>
+                <p>Relaxing full-body massage to relieve stress and tension.</p>
             </div>
         </div>
 
         <div class="flip" role="listitem" aria-label="Signature Facial card">
-            <div class="front" style="background: linear-gradient(135deg,#3a3a3a,#222);">
-                <h1 class="text-shadow">OASIS</h1>
+            <div class="front" style="background-image: url('/images/Signature Facial.webp');" aria-hidden="true">
+                <h1 class="text-shadow">Signature Facial</h1>
             </div>
             <div class="back">
-                <h2>Signature Facial</h2>
-                <p>Rejuvenating facial treatment with cleansing, exfoliation, and mask. Duration: 60 min — Price: $70</p>
+                <h2>Duration: 60 min — Price: $70</h2>
+                <p>Rejuvenating facial treatment with cleansing, exfoliation, and mask.</p>
+            </div>
+        </div>
+
+        <div class="flip" role="listitem" aria-label="Deep Tissue Massage card">
+            <div class="front" style="background-image: url('/images/Deep Tissue Massage.webp');" aria-hidden="true">
+                <h1 class="text-shadow">Deep Tissue Massage</h1>
+            </div>
+            <div class="back">
+                <h2>Duration: 90 min — Price: $110</h2>
+                <p>Intense massage targeting the inner layers of your muscles</p>
             </div>
         </div>
 
         <div class="flip flip-vertical" role="listitem" aria-label="Hot Stone Therapy card">
-            <div class="front" style="background-image: url('/images/SpaImage.png');" aria-hidden="true">
-                <h1 class="text-shadow">FOREST</h1>
+            <div class="front" style="background-image: url('/images/Hot Stone.jpg');" aria-hidden="true">
+                <h1 class="text-shadow">Hot Stone Therapy</h1>
             </div>
             <div class="back">
-                <h2>Hot Stone Therapy</h2>
-                <p>Smooth heated stones placed on specific parts of the body. Duration: 75 min — Price: $130</p>
+                <h2>Duration: 75 min — Price: $130</h2>
+                <p>Smooth heated stones placed on specific parts of the body.</p>
             </div>
         </div>
 
         <div class="flip flip-vertical" role="listitem" aria-label="Aromatherapy card">
-            <div class="front" style="background: linear-gradient(135deg,#464646,#2b2b2b);">
-                <h1 class="text-shadow">BREEZE</h1>
+            <div class="front" style="background-image: url('/images/Aromatherapy.jpg');" aria-hidden="true" ">
+                <h1 class="text-shadow">Aromatherapy</h1>
             </div>
             <div class="back">
-                <h2>Aromatherapy</h2>
-                <p>Massage using concentrated essential oils to relax and invigorate. Duration: 45 min — Price: $65</p>
+                <h2> Duration: 45 min — Price: $65</h2>
+                <p>Massage using concentrated essential oils to relax and invigorate.</p>
             </div>
         </div>
     </div>
 
+    <div class="flip flip-vertical" role="listitem" aria-label="Mani-Pedi Deluxe card">
+        <div class="front" style="background-image: url('/images/Mani-pedi.jpg');" aria-hidden="true">
+        </div>
+        <div class="back">
+            <h2>Duration: 45 min — Price: $65</h2>
+            <p>Massage using concentrated essential oils to relax and invigorate.</p>
+        </div>
+    </div>
    
 </div>
 
