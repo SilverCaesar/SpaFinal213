@@ -1,62 +1,95 @@
 ﻿@page "/bookappointment"
+
 @using Microsoft.EntityFrameworkCore
+@using SpaFinal213.Components.Shared
 @using SpaFinal213.Models
 @inject IDbContextFactory<SpaFinal213.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
-<PageTitle>Create</PageTitle>
-<h1>Book Now !</h1>
 
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Appointment</h2>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <EditForm method="post" Model="Appointment" OnValidSubmit="AddAppointment" FormName="create" Enhance>
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
+            <ValidationSummary class="text-danger" role="alert" />
             <div class="mb-3">
-                <label for="customer_id" class="form-label">Customer_Id:</label> 
-                <InputNumber id="customer_id" @bind-Value="Appointment.Customer_Id" class="form-control" /> 
-                <ValidationMessage For="() => Appointment.Customer_Id" class="text-danger" /> 
-            </div>        
+                <label for="customer_id" class="form-label">Customer:</label>
+                <InputSelect id="customer_id" @bind-Value="Appointment.Customer_Id" class="form-control">
+                    <option value="">-- Select customer --</option>
+                    @foreach (var c in Customers)
+                    {
+                        <option value="@c.Customer_Id">@($"{c.Fname} {c.Lname}")</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Appointment.Customer_Id" class="text-danger" />
+            </div>
+
             <div class="mb-3">
-                <label for="employee_id" class="form-label">Employee_Id:</label> 
-                <InputNumber id="employee_id" @bind-Value="Appointment.Employee_Id" class="form-control" /> 
-                <ValidationMessage For="() => Appointment.Employee_Id" class="text-danger" /> 
-            </div>        
+                <label for="createCustomer" class="form-label"> New to our System? </label>
+                <a href="/customers/create" id="createCustomer" class="btn btn-secondary btn-sm ms-2">Create Customer</a>
+            </div>
+
             <div class="mb-3">
-                <label for="service_id" class="form-label">Service_Id:</label> 
-                <InputNumber id="service_id" @bind-Value="Appointment.Service_Id" class="form-control" /> 
-                <ValidationMessage For="() => Appointment.Service_Id" class="text-danger" /> 
-            </div>        
+                <label for="employee_id" class="form-label">Employee:</label>
+                <InputSelect id="employee_id" @bind-Value="Appointment.Employee_Id" class="form-control">
+                    <option value="">-- Select employee --</option>
+                    @foreach (var e in Employees)
+                    {
+                        <option value="@e.EmployeeId">@($"{e.FName} {e.LName}")</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Appointment.Employee_Id" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="date" class="form-label">Date:</label> 
-                <InputDate id="date" @bind-Value="Appointment.Date" class="form-control" /> 
-                <ValidationMessage For="() => Appointment.Date" class="text-danger" /> 
-            </div>        
+                <label for="service_id" class="form-label">Service:</label>
+                <InputSelect id="service_id" @bind-Value="Appointment.Service_Id" class="form-control" @onchange="RecalcPrice">
+                    <option value="">-- Select service --</option>
+                    @foreach (var s in Services)
+                    {
+                        <option value="@s.Service_Id">@($"{s.Name} ({s.Duration}m) - {s.Price:C}")</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Appointment.Service_Id" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="start" class="form-label">Start:</label> 
-                <InputDate id="start" @bind-Value="Appointment.Start" class="form-control" /> 
-                <ValidationMessage For="() => Appointment.Start" class="text-danger" /> 
-            </div>        
+                <label for="date" class="form-label">Date and time:</label>
+                <InputDateTimeLocal id="date" @bind-Value="Appointment.Date" class="form-control" @onchange="SyncStartWithDate" />
+                <ValidationMessage For="() => Appointment.Date" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="status" class="form-label">Status:</label> 
-                <InputText id="status" @bind-Value="Appointment.Status" class="form-control" /> 
-                <ValidationMessage For="() => Appointment.Status" class="text-danger" /> 
-            </div>        
+                <label for="start" class="form-label">Start:</label>
+                <InputDateTimeLocal id="start" @bind-Value="Appointment.Start" class="form-control" disabled hidden />
+                <ValidationMessage For="() => Appointment.Start" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="notes" class="form-label">Notes:</label> 
-                <InputText id="notes" @bind-Value="Appointment.Notes" class="form-control" /> 
-                <ValidationMessage For="() => Appointment.Notes" class="text-danger" /> 
-            </div>        
+                <label for="status" class="form-label">Status:</label>
+                <InputText id="status" @bind-Value="Appointment.Status" class="form-control" />
+                <ValidationMessage For="() => Appointment.Status" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="price" class="form-label">Price:</label> 
-                <InputNumber id="price" @bind-Value="Appointment.Price" class="form-control" /> 
-                <ValidationMessage For="() => Appointment.Price" class="text-danger" /> 
-            </div>        
+                <label for="notes" class="form-label">Notes:</label>
+                <InputText id="notes" @bind-Value="Appointment.Notes" class="form-control" />
+                <ValidationMessage For="() => Appointment.Notes" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="duration" class="form-label">Duration:</label> 
-                <InputNumber id="duration" @bind-Value="Appointment.Duration" class="form-control" /> 
-                <ValidationMessage For="() => Appointment.Duration" class="text-danger" /> 
-            </div>        
+                <label for="price" class="form-label">Price:</label>
+                <InputNumber id="price" @bind-Value="Appointment.Price" class="form-control" disabled />
+                <ValidationMessage For="() => Appointment.Price" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="duration" class="form-label">Duration (minutes):</label>
+                <InputNumber id="duration" @bind-Value="Appointment.Duration" class="form-control" @onchange="RecalcPrice" />
+                <ValidationMessage For="() => Appointment.Duration" class="text-danger" />
+            </div>
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="text-danger mb-2">@ErrorMessage</div>
+            }
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
@@ -67,15 +100,98 @@
 </div>
 
 @code {
+    private List<Customer> Customers { get; set; } = new();
+    private List<Service> Services { get; set; } = new();
+    private List<Employee> Employees { get; set; } = new();
+    private string? ErrorMessage;
+
     [SupplyParameterFromForm]
     private Appointment Appointment { get; set; } = default!;
 
-    protected override void OnInitialized() => Appointment ??= new();
+    protected override async Task OnInitializedAsync()
+    {
+        Appointment ??= new Appointment { Date = DateTime.Now, Start = DateTime.Now, Duration = 60 };
+        using var context = DbFactory.CreateDbContext();
+        Customers = await context.Customer.OrderBy(c => c.Fname).ToListAsync();
+        Services = await context.Service.OrderBy(s => s.Name).ToListAsync();
+        Employees = await context.Employee.OrderBy(e => e.FName).ToListAsync();
+        CalculatePrice();
+    }
 
-    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private void RecalcPrice(ChangeEventArgs _)
+    {
+        CalculatePrice();
+    }
+
+    private void CalculatePrice()
+    {
+        Appointment.Price = 0m;
+
+        if (!Appointment.Service_Id.HasValue)
+            return;
+
+        var svc = Services.FirstOrDefault(s => s.Service_Id == Appointment.Service_Id.Value);
+        if (svc == null || svc.Duration <= 0)
+            return;
+
+        // price scales proportionally by duration; round to 2 decimals
+        var ratio = (decimal)Appointment.Duration / svc.Duration;
+        Appointment.Price = Math.Round(svc.Price * ratio, 2);
+    }
+
+    // keep Start in sync with Date when the user changes the Date control
+    private void SyncStartWithDate(ChangeEventArgs _)
+    {
+        Appointment.Start = Appointment.Date;
+    }
+
     private async Task AddAppointment()
     {
+        ErrorMessage = null;
         using var context = DbFactory.CreateDbContext();
+
+        if (!Appointment.Customer_Id.HasValue)
+        {
+            ErrorMessage = "Please select a customer.";
+            return;
+        }
+        if (!Appointment.Service_Id.HasValue)
+        {
+            ErrorMessage = "Please select a service.";
+            return;
+        }
+
+        var customerExists = await context.Customer.AnyAsync(c => c.Customer_Id == Appointment.Customer_Id.Value);
+        if (!customerExists)
+        {
+            ErrorMessage = "Selected customer does not exist. Please choose an existing customer.";
+            return;
+        }
+
+        var serviceExists = await context.Service.AnyAsync(s => s.Service_Id == Appointment.Service_Id.Value);
+        if (!serviceExists)
+        {
+            ErrorMessage = "Selected service does not exist. Please choose an existing service.";
+            return;
+        }
+
+        // employee is optional; if chosen, validate it exists
+        if (Appointment.Employee_Id.HasValue)
+        {
+            var employeeExists = await context.Employee.AnyAsync(e => e.EmployeeId == Appointment.Employee_Id.Value);
+            if (!employeeExists)
+            {
+                ErrorMessage = "Selected employee does not exist. Please choose an existing employee.";
+                return;
+            }
+        }
+
+        // ensure Start matches Date before saving
+        Appointment.Start = Appointment.Date;
+
+        // ensure the price is current before saving
+        CalculatePrice();
+
         context.Appointment.Add(Appointment);
         await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/appointments");

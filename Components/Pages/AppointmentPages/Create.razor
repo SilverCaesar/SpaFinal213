@@ -1,5 +1,6 @@
 ﻿@page "/appointments/create"
 @using Microsoft.EntityFrameworkCore
+@using SpaFinal213.Components.Shared
 @using SpaFinal213.Models
 @inject IDbContextFactory<SpaFinal213.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
@@ -26,6 +27,12 @@
                 </InputSelect>
                 <ValidationMessage For="() => Appointment.Customer_Id" class="text-danger" />
             </div>
+
+            <div class="mb-3">
+                <label for="createCustomer" class="form-label"> New to our System? </label>
+                <a href="/customers/create" id="createCustomer" class="btn btn-secondary btn-sm ms-2">Create Customer</a>
+            </div>
+
             <div class="mb-3">
                 <label for="employee_id" class="form-label">Employee:</label>
                 <InputSelect id="employee_id" @bind-Value="Appointment.Employee_Id" class="form-control">
@@ -49,13 +56,13 @@
                 <ValidationMessage For="() => Appointment.Service_Id" class="text-danger" /> 
             </div>        
             <div class="mb-3">
-                <label for="date" class="form-label">Date:</label> 
-                <InputDate id="date" @bind-Value="Appointment.Date" class="form-control" /> 
+                <label for="date" class="form-label">Date and time:</label> 
+                <InputDateTimeLocal id="date" @bind-Value="Appointment.Date" class="form-control" @onchange="SyncStartWithDate" /> 
                 <ValidationMessage For="() => Appointment.Date" class="text-danger" /> 
             </div>        
             <div class="mb-3">
                 <label for="start" class="form-label">Start:</label> 
-                <InputDate id="start" @bind-Value="Appointment.Start" class="form-control" /> 
+                <InputDateTimeLocal id="start" @bind-Value="Appointment.Start" class="form-control" disabled hidden /> 
                 <ValidationMessage For="() => Appointment.Start" class="text-danger" /> 
             </div>        
             <div class="mb-3">
@@ -102,7 +109,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Appointment ??= new Appointment { Date = DateTime.Today, Duration = 60 };
+        Appointment ??= new Appointment { Date = DateTime.Now, Start = DateTime.Now, Duration = 60 };
         using var context = DbFactory.CreateDbContext();
         Customers = await context.Customer.OrderBy(c => c.Fname).ToListAsync();
         Services = await context.Service.OrderBy(s => s.Name).ToListAsync();
@@ -129,6 +136,12 @@
         // price scales proportionally by duration; round to 2 decimals
         var ratio = (decimal)Appointment.Duration / svc.Duration;
         Appointment.Price = Math.Round(svc.Price * ratio, 2);
+    }
+
+    // keep Start in sync with Date when the user changes the Date control
+    private void SyncStartWithDate(ChangeEventArgs _)
+    {
+        Appointment.Start = Appointment.Date;
     }
 
     private async Task AddAppointment()
@@ -171,6 +184,9 @@
                 return;
             }
         }
+
+        // ensure Start matches Date before saving
+        Appointment.Start = Appointment.Date;
 
         // ensure the price is current before saving
         CalculatePrice();

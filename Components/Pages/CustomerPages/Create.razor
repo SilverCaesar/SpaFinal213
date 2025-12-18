@@ -16,12 +16,6 @@
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="mb-3">
-                <span class="text-danger">*</span>
-                <label for="applicationuserid" class="form-label">ApplicationUserId:</label> 
-                <InputText id="applicationuserid" @bind-Value="Customer.ApplicationUserId" class="form-control" aria-required="true"/> 
-                <ValidationMessage For="() => Customer.ApplicationUserId" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
                 <label for="fname" class="form-label">Fname:</label> 
                 <InputText id="fname" @bind-Value="Customer.Fname" class="form-control" /> 
                 <ValidationMessage For="() => Customer.Fname" class="text-danger" /> 
@@ -35,12 +29,7 @@
                 <label for="notes" class="form-label">Notes:</label> 
                 <InputText id="notes" @bind-Value="Customer.Notes" class="form-control" /> 
                 <ValidationMessage For="() => Customer.Notes" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="dateaccount" class="form-label">DateAccount:</label> 
-                <InputDate id="dateaccount" @bind-Value="Customer.DateAccount" class="form-control" /> 
-                <ValidationMessage For="() => Customer.DateAccount" class="text-danger" /> 
-            </div>        
+            </div>
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
@@ -54,11 +43,22 @@
     [SupplyParameterFromForm]
     private Customer Customer { get; set; } = default!;
 
-    protected override void OnInitialized() => Customer ??= new();
+    // Initialize the Customer model and default DateAccount to now
+    protected override void OnInitialized() => Customer ??= new Customer { DateAccount = DateTime.Now };
 
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddCustomer()
     {
+        // defensive: ensure DateAccount is set if the model was somehow null/default
+        if (Customer == null)
+        {
+            Customer = new Customer { DateAccount = DateTime.Now };
+        }
+        else if (Customer.DateAccount == default)
+        {
+            Customer.DateAccount = DateTime.Now;
+        }
+
         using var context = DbFactory.CreateDbContext();
         context.Customer.Add(Customer);
         await context.SaveChangesAsync();
