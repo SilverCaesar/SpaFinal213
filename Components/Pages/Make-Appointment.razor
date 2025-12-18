@@ -30,7 +30,7 @@
 
             <div class="mb-3">
                 <label for="createCustomer" class="form-label"> New to our System? </label>
-                <a href="/c" id="createCustomer" class="btn btn-secondary btn-sm ms-2">Create Customer</a>
+                <a href="/clientcustomercreate" id="createCustomer" class="btn btn-secondary btn-sm ms-2">Create Customer</a>
             </div>
 
             <div class="mb-3">
@@ -62,12 +62,12 @@
             </div>
             <div class="mb-3">
                 <label for="start" class="form-label">Start:</label>
-                <InputDate Type="InputDateType.DateTimeLocal" id="start" @bind-value="Appointment.Start" class="form-control" />
+                <InputDate Type="InputDateType.DateTimeLocal" id="start" @bind-value="Appointment.Start" class="form-control" disabled />
                 <ValidationMessage For="() => Appointment.Start" class="text-danger" />
             </div>
             <div class="mb-3">
                 <label for="status" class="form-label">Status:</label>
-                <InputText id="status" @bind-Value="Appointment.Status" class="form-control" />
+                <InputText id="status" @bind-Value="Appointment.Status" class="form-control" disabled/>
                 <ValidationMessage For="() => Appointment.Status" class="text-danger" />
             </div>
             <div class="mb-3">
@@ -82,7 +82,7 @@
             </div>
             <div class="mb-3">
                 <label for="duration" class="form-label">Duration (minutes):</label>
-                <InputNumber id="duration" @bind-Value="Appointment.Duration" class="form-control" @onchange="RecalcPrice" />
+                <InputNumber id="duration" @bind-Value="Appointment.Duration" class="form-control" @onchange="RecalcPrice" disabled/>
                 <ValidationMessage For="() => Appointment.Duration" class="text-danger" />
             </div>
             @if (!string.IsNullOrEmpty(ErrorMessage))
@@ -109,7 +109,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Appointment ??= new Appointment { Date = DateTime.Now.Date, Start = TimeOnly.FromDateTime(DateTime.Now), Duration = 60, Status = "Scheduled" };
+        Appointment ??= new Appointment { Date = DateTime.Now.Date, Start = TimeOnly.FromDateTime(DateTime.Now), Duration = 60, Status = "Scheduled"};
         using var context = DbFactory.CreateDbContext();
         Customers = await context.Customer.OrderBy(c => c.Fname).ToListAsync();
         Services = await context.Service.OrderBy(s => s.Name).ToListAsync();
