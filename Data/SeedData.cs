@@ -97,6 +97,69 @@ namespace SpaFinal213.Data
                         Description = "A therapeutic massage targeting deeper layers of muscle.",
                         Duration = 60,
                         Price = 90.00M
+                    },
+                    new Service
+                    {
+                        Name = "Hot Stone Massage",
+                        Description = "Warm stones used to relax muscles and improve circulation.",
+                        Duration = 75,
+                        Price = 110.00M
+                    },
+                    new Service
+                    {
+                        Name = "Aromatherapy Massage",
+                        Description = "Relaxing massage using essential oils tailored to your needs.",
+                        Duration = 60,
+                        Price = 85.00M
+                    },
+                    new Service
+                    {
+                        Name = "Prenatal Massage",
+                        Description = "Gentle massage techniques designed for expectant mothers.",
+                        Duration = 60,
+                        Price = 85.00M
+                    },
+                    new Service
+                    {
+                        Name = "Reflexology",
+                        Description = "Focused pressure on feet and hands to promote balance and relaxation.",
+                        Duration = 45,
+                        Price = 60.00M
+                    },
+                    new Service
+                    {
+                        Name = "Facial Treatment",
+                        Description = "Cleansing, exfoliation and hydration tailored to skin type.",
+                        Duration = 50,
+                        Price = 70.00M
+                    },
+                    new Service
+                    {
+                        Name = "Body Scrub",
+                        Description = "Exfoliating full-body treatment to smooth and renew skin.",
+                        Duration = 50,
+                        Price = 95.00M
+                    },
+                    new Service
+                    {
+                        Name = "Manicure",
+                        Description = "Nail shaping, cuticle care and polish.",
+                        Duration = 30,
+                        Price = 30.00M
+                    },
+                    new Service
+                    {
+                        Name = "Pedicure",
+                        Description = "Foot soak, exfoliation, nail care and polish.",
+                        Duration = 45,
+                        Price = 45.00M
+                    },
+                    new Service
+                    {
+                        Name = "Couples Massage",
+                        Description = "Two therapists provide massages simultaneously for two guests.",
+                        Duration = 60,
+                        Price = 160.00M
                     }
                 );
             }
