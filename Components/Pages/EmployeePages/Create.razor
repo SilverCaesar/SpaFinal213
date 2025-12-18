@@ -14,13 +14,7 @@
     <div class="col-md-4">
         <EditForm method="post" Model="Employee" OnValidSubmit="AddEmployee" FormName="create" Enhance>
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
-            <div class="mb-3">
-                <span class="text-danger">*</span>
-                <label for="applicationuserid" class="form-label">ApplicationUserId:</label> 
-                <InputText id="applicationuserid" @bind-Value="Employee.ApplicationUserId" class="form-control" aria-required="true"/> 
-                <ValidationMessage For="() => Employee.ApplicationUserId" class="text-danger" /> 
-            </div>        
+            <ValidationSummary class="text-danger" role="alert"/>   
             <div class="mb-3">
                 <label for="fname" class="form-label">FName:</label> 
                 <InputText id="fname" @bind-Value="Employee.FName" class="form-control" /> 

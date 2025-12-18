@@ -1,0 +1,207 @@
+﻿@page "/bookappointment"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using SpaFinal213.Data
+@using SpaFinal213.Models
+@inject ApplicationDbContext Db
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+@inject UserManager<ApplicationUser> UserManager
+
+<h3>Book New Appointment</h3>
+
+@if (!string.IsNullOrEmpty(Notification))
+{
+    <div class="alert alert-info">@Notification</div>
+}
+
+<EditForm Model="Form" OnValidSubmit="HandleValidSubmit" FormName="MakeAppointmentForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary class="text-danger" />
+
+    <h4>Contact</h4>
+    <div class="mb-3">
+        <label class="form-label">First name</label>
+        <InputText class="form-control" @bind-Value="Form.FirstName" />
+        <ValidationMessage For="() => Form.FirstName" class="text-danger" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Last name</label>
+        <InputText class="form-control" @bind-Value="Form.LastName" />
+        <ValidationMessage For="() => Form.LastName" class="text-danger" />
+    </div>
+
+    <h4>Appointment</h4>
+    <div class="mb-3">
+        <label class="form-label">Service</label>
+        <InputSelect class="form-control" @bind-Value="Form.ServiceId" TValue="int?">
+            <option value="">-- Select service --</option>
+            @foreach (var s in Services)
+            {
+                <option value="@s.Service_Id">@($"{s.Name} — {s.Duration} min — {s.Price:C}")</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => Form.ServiceId" class="text-danger" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Employee</label>
+        <InputSelect class="form-control" @bind-Value="Form.EmployeeId" TValue="int?">
+            <option value="">-- Select employee --</option>
+            @foreach (var e in Employees)
+            {
+                <option value="@e.EmployeeId">@($"{e.FName} {e.LName}")</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => Form.EmployeeId" class="text-danger" />
+    </div>
+
+    <div class="row g-2 mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Date</label>
+            <InputDate class="form-control" @bind-Value="Form.Date" />
+            <ValidationMessage For="() => Form.Date" class="text-danger" />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Time</label>
+            <input type="time" class="form-control" @bind="Form.Time" @bind:format="HH:mm" />
+            <ValidationMessage For="() => Form.Time" class="text-danger" />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Notes</label>
+        <InputTextArea class="form-control" @bind-Value="Form.Notes" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Appointment</button>
+</EditForm>
+
+@code {
+    private string? Notification;
+
+    private List<Service> Services { get; set; } = new();
+    private List<Employee> Employees { get; set; } = new();
+
+    private AppointmentFormModel Form { get; set; } = new()
+    {
+        Date = DateTime.Today,
+        Time = TimeOnly.FromTimeSpan(TimeSpan.FromHours(9))
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        Services = await Db.Service.OrderBy(s => s.Name).ToListAsync();
+        Employees = await Db.Employee.OrderBy(e => e.FName).ThenBy(e => e.LName).ToListAsync();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        Notification = null;
+
+        // Basic server-side validation
+        if (!Form.ServiceId.HasValue || !Form.EmployeeId.HasValue)
+        {
+            Notification = "Please select both a service and an employee.";
+            return;
+        }
+
+        // Resolve service and employee from DB
+        var service = await Db.Service.FindAsync(Form.ServiceId.Value);
+        var employee = await Db.Employee.FindAsync(Form.EmployeeId.Value);
+
+        if (service is null || employee is null)
+        {
+            Notification = "Selected service or employee no longer exists.";
+            return;
+        }
+
+        // Create or find customer
+        Customer customer = new()
+        {
+            Fname = Form.FirstName?.Trim() ?? string.Empty,
+            Lname = Form.LastName?.Trim() ?? string.Empty,
+            Notes = null,
+            DateAccount = DateTime.UtcNow
+        };
+
+        try
+        {
+            // try to link to authenticated user if present
+            var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = auth.User;
+            if (user.Identity?.IsAuthenticated == true)
+            {
+                var appUser = await UserManager.GetUserAsync(user);
+                if (appUser != null)
+                {
+                    customer.ApplicationUserId = appUser.Id;
+                }
+            }
+
+            Db.Customer.Add(customer);
+            await Db.SaveChangesAsync();
+        }
+        catch (DbUpdateException dbEx)
+        {
+            Notification = "Failed to save customer: " + dbEx.GetBaseException().Message;
+            return;
+        }
+
+        // Compose appointment start time
+        var start = Form.Date.Date + (Form.Time?.ToTimeSpan() ?? TimeSpan.Zero);
+
+        var appointment = new Appointment
+        {
+            Customer_Id = customer.Customer_Id,
+            Employee_Id = employee.EmployeeId,
+            Service_Id = service.Service_Id,
+            Date = Form.Date.Date,
+            Start = start,
+            Duration = service.Duration,
+            Price = service.Price,
+            Notes = Form.Notes,
+            Status = "Scheduled"
+        };
+
+        try
+        {
+            Db.Appointment.Add(appointment);
+            await Db.SaveChangesAsync();
+        }
+        catch (DbUpdateException dbEx)
+        {
+            Notification = "Failed to save appointment: " + dbEx.GetBaseException().Message;
+            return;
+        }
+
+        Notification = "Appointment created.";
+        Navigation.NavigateTo("/appointments");
+    }
+
+    private class AppointmentFormModel
+    {
+        [Required]
+        public string? FirstName { get; set; }
+
+        [Required]
+        public string? LastName { get; set; }
+
+        [Required]
+        public int? ServiceId { get; set; }
+
+        [Required]
+        public int? EmployeeId { get; set; }
+
+        [Required]
+        public DateTime Date { get; set; }
+
+        [Required]
+        public TimeOnly? Time { get; set; }
+
+        public string? Notes { get; set; }
+    }
+}
