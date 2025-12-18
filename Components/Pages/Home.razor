@@ -6,9 +6,49 @@
     <div class="hero-bg" aria-hidden="true"></div>
 
     <div class="hero-center">
+        
+        <!-- Full width card below — background image now fills the box exactly -->
+        <div class="hero-card-inner hero-card-full"
+             style="background-image: url('/images/SpaHome1.jpg');
+                    background-size: cover;
+                    background-position: center;
+                    background-repeat: no-repeat;
+                    background-color: transparent;"
+             aria-hidden="true">
+            <!-- Optional semi-transparent overlay to improve text contrast -->
+            <div style="background: rgba(0,0,0,0.35); padding: 1.25rem; border-radius: 8px;">
+                <h3 class="text-center mb-3" style="color: #fff;">New to Us?</h3>
+                <p class="text-center" style="color: #fff;">Create an account and start booking today.</p>
+                <div class="text-center mt-3">
+                    <a class="btn btn-success" href="/Account/Register">Create Account</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Life card (same treatment as full-width card, using SpaImage.png) -->
+        <div class="hero-card-inner hero-card-full"
+             style="background-image: url('/images/SpaImage.png');
+                    background-size: cover;
+                    background-position: center;
+                    background-repeat: no-repeat;
+                    background-color: transparent;
+                    margin-top: 1rem;"
+             aria-hidden="true">
+            <!-- Optional overlay for contrast -->
+            <div style="background: rgba(0,0,0,0.35); padding: 1.25rem; border-radius: 8px;">
+                <h3 class="text-center mb-3" style="color: #fff;">Life Changing Experience</h3>
+                <p class="text-center" style="color: #fff;">
+                    Discover more about our wellness packages and lifestyle offerings.
+                </p>
+                <div class="text-center mt-3">
+                    <a class="btn btn-outline-light" href="/OldServices">Learn More</a>
+                </div>
+            </div>
+        </div>
+
         <div class="hero-cards">
             <!-- Left card -->
-            <div class="hero-card-inner">
+            <div class="hero-card-inner" style="background: #f5f5dc;">
                 <h2>Schedule Your Spa Day</h2>
                 <p>
                     Relax, refresh, and rejuvenate. Log in or contact us at
@@ -18,7 +58,7 @@
             </div>
 
             <!-- Right card -->
-            <div class="hero-card-inner">
+            <div class="hero-card-inner" style="background: #f5f5dc;">
                 <h3>Our Services</h3>
                 <ul>
                     <li>Massage Therapy</li>
@@ -28,15 +68,6 @@
                     <li>Hair Removal</li>
                     <li>More on our <a href="/OldServices">Services</a> page</li>
                 </ul>
-            </div>
-        </div>
-
-        <!-- Full width card below -->
-        <div class="hero-card-inner hero-card-full">
-            <h3 class="text-center mb-3">New to Us?</h3>
-            <p class="text-center">Create an account and start booking today.</p>
-            <div class="text-center mt-3">
-                <a class="btn btn-success" href="/Account/Register">Create Account</a>
             </div>
         </div>
     </div>

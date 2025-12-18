@@ -1,4 +1,153 @@
-﻿<h3>Reviews</h3>
+﻿@page "/reviews"
+@using System
+@using System.Linq
+@using System.Collections.Generic
+@using Microsoft.AspNetCore.Components
+
+<h2 class="page-title" style="color: white">Customer Reviews</h2>
+
+    <div class="reviews-hero">
+    <!-- dark translucent box behind everything -->
+    <div class="reviews-bg" aria-hidden="true"></div>
+
+    <!-- larger beige box sitting between dark bg and the interactive content -->
+    <div class="reviews-beige" aria-hidden="true"></div>
+
+    <!-- interactive content sits on top (review cards remain white) -->
+    <div class="reviews-card">
+        <div class="reviews-overview">
+            <div class="average">
+                <div class="avg-value">@AverageRating.ToString("0.0")</div>
+                <div class="avg-stars">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <span class="star @(i <= (int)Math.Round(AverageRating) ? "full" : "")">★</span>
+                    }
+                </div>
+                <div class="avg-count">@_reviews.Count review(s)</div>
+            </div>
+
+            <div class="distribution">
+                @for (int r = 5; r >= 1; r--)
+                {
+                    var cnt = RatingCounts.TryGetValue(r, out var c) ? c : 0;
+                    var pct = _reviews.Count > 0 ? (int)Math.Round(cnt * 100.0 / _reviews.Count) : 0;
+                    <div class="dist-row">
+                        <div class="dist-label">@r <span class="small">star</span></div>
+                        <div class="dist-bar">
+                            <div class="dist-fill" style=@($"width:{pct}%")></div>
+                        </div>
+                        <div class="dist-count">@cnt</div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="controls">
+            <label>Filter:</label>
+            <button class="btn @(ActiveFilter==0 ? "active" : "")" @onclick="() => SetFilter(0)">All</button>
+            @for (int i = 5; i >= 1; i--)
+            {
+                <button class="btn @(ActiveFilter==i ? "active" : "")" @onclick="() => SetFilter(i)">@i ★</button>
+            }
+        </div>
+
+        <div class="reviews-grid">
+            @foreach (var r in FilteredReviews)
+            {
+                <article class="review-card" aria-label="Review by @r.Author">
+                    <div class="review-header">
+                        <div class="avatar">@GetAvatarMarkup(r)</div>
+                        <div class="meta">
+                            <div class="author">@r.Author</div>
+                            <div class="date">@r.Date.ToString("MMM d, yyyy")</div>
+                        </div>
+                        <div class="rating">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <span class="star @(i <= r.Rating ? "full" : "")">★</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="review-body">@r.Content</div>
+
+                    @if (r.Tags?.Any() == true)
+                    {
+                        <div class="tags">
+                            @foreach (var t in r.Tags)
+                            {
+                                <span class="tag">@t</span>
+                            }
+                        </div>
+                    }
+                </article>
+            }
+        </div>
+    </div>
+</div>
 
 @code {
+    private record Review(string Author, DateTime Date, int Rating, string Content, string[]? Tags = null, string? AvatarUrl = null);
+
+    private List<Review> _reviews { get; } = new()
+    {
+        new Review("Ava Johnson", DateTime.UtcNow.AddDays(-2), 5,
+            "Excellent service — the massage helped me unwind completely. Staff were friendly and very professional.",
+            new[] { "Professional", "Calming" }, null),
+        new Review("Liam Smith", DateTime.UtcNow.AddDays(-10), 4,
+            "Great facial. The only downside was a slightly long wait, but the end result was worth it.",
+            new[] { "Facial", "Worth it" }, null),
+        new Review("Olivia Brown", DateTime.UtcNow.AddDays(-30), 5,
+            "My go-to spa. Clean, welcoming, and consistently outstanding therapists.",
+            new[] { "Consistent", "Clean" }, null),
+        new Review("Noah Wilson", DateTime.UtcNow.AddDays(-7), 3,
+            "Good experience overall, but the pressure on the massage didn't suit me. Ask for medium pressure.",
+            new[] { "Massage" }, null),
+        new Review("Emma Davis", DateTime.UtcNow.AddDays(-4), 5,
+            "Loved the aromatherapy add-on — highly recommend this place for people who need to de-stress.",
+            new[] { "Aromatherapy", "Relaxing" }, null),
+        new Review("Lucas Martinez", DateTime.UtcNow.AddDays(-1), 4,
+            "Friendly staff and great value packages. Will be back for the couples treatment.",
+            new[] { "Value", "Couples" }, null),
+    };
+
+    private int ActiveFilter { get; set; } = 0;
+
+    private IEnumerable<Review> FilteredReviews
+        => ActiveFilter == 0 ? _reviews : _reviews.Where(r => r.Rating == ActiveFilter);
+
+    private double AverageRating => _reviews.Count == 0 ? 0 : _reviews.Average(r => r.Rating);
+
+    private Dictionary<int, int> RatingCounts
+        => Enumerable.Range(1, 5).ToDictionary(i => i, i => _reviews.Count(r => r.Rating == i));
+
+    private void SetFilter(int star) => ActiveFilter = star;
+
+    private RenderFragment GetAvatarMarkup(Review r) => builder =>
+    {
+        var initials = GetInitials(r.Author);
+        var color = GetColorForString(r.Author);
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", "avatar-circle");
+        builder.AddAttribute(2, "style", $"background:{color}");
+        builder.AddContent(3, initials);
+        builder.CloseElement();
+    };
+
+    private static string GetInitials(string name)
+    {
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpperInvariant();
+        return (parts[0][0].ToString() + parts[^1][0].ToString()).ToUpperInvariant();
+    }
+
+    private static string GetColorForString(string s)
+    {
+        var hash = s.Aggregate(23, (acc, ch) => acc * 31 + ch);
+        var r = (Math.Abs(hash) >> 0) & 0xFF;
+        var g = (Math.Abs(hash) >> 8) & 0xFF;
+        var b = (Math.Abs(hash) >> 16) & 0xFF;
+        return $"rgb({r},{g},{b})";
+    }
 }

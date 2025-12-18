@@ -25,8 +25,8 @@ namespace SpaFinal213.Models
         [DataType(DataType.DateTime)]
         public DateTime Date { get; set; }
 
-        [DataType(DataType.DateTime)]
-        public DateTime Start { get; set; }
+        [DataType(DataType.Time)]
+        public TimeOnly Start { get; set; }
 
         public string? Status { get; set; }
 
